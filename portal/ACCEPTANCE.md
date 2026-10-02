@@ -18,5 +18,5 @@ This checklist mirrors the build brief. “Automated E2E” items require a conf
 - [ ] Accessibility Playwright baseline executed against a deployed/seeded portal.
 - [x] Unit test suite includes validation schemas, permission helpers used by guards, proposal acceptance rules, and lead routing/role helpers.
 - [x] Playwright suite includes all seven critical flows required by the brief.
-- [ ] CI lint/typecheck/unit/security/build job passes on the final commit.
+- [x] CI lint/typecheck/unit/security/build job passed on the Phase 8 implementation commit; rerun is required after any later hardening fix before production promotion.
 - [ ] Production portal deployment is READY and post-deploy runtime error scan is clean.

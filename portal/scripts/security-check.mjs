@@ -50,3 +50,25 @@ if (failures.length) {
 }
 
 console.log("Security source check passed.");
+
+
+const hardeningRequirements = [
+  ["app/(auth)/login/actions.ts", "consumePortalRateLimit", "login rate limiting"],
+  ["app/(auth)/accept-invite/actions.ts", "consumePortalRateLimit", "invite acceptance rate limiting"],
+  ["app/(admin)/admin/organizations/[orgId]/actions.ts", "consumePortalRateLimit", "invite create/resend rate limiting"],
+  ["app/api/documents/upload-intent/route.ts", "isSameOriginRequest", "document upload-intent same-origin protection"],
+  ["app/api/documents/complete-upload/route.ts", "isSameOriginRequest", "document completion same-origin protection"],
+  ["app/api/documents/signed-url/route.ts", "isSameOriginRequest", "document signed-url same-origin protection"],
+  ["app/api/lead-intake/route.ts", "determineLeadRouting", "server-derived lead routing"],
+];
+
+for (const [relativePath, marker, description] of hardeningRequirements) {
+  const source = await readFile(new URL(`../src/${relativePath}`, import.meta.url), "utf8");
+  if (!source.includes(marker)) failures.push(`${relativePath}: missing ${description}`);
+}
+
+if (failures.length) {
+  console.error("Security hardening regression check failed:");
+  for (const failure of failures) console.error(`- ${failure}`);
+  process.exit(1);
+}
