@@ -1427,3 +1427,24 @@ p {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+
+/* Phase 5: legal content */
+.legal-content {
+  display: grid;
+  gap: var(--space-8);
+  max-width: var(--reading-max);
+}
+
+.legal-content section {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.legal-content h2 {
+  font-size: var(--step-2);
+}
+
+.legal-content p {
+  color: var(--color-muted);
+}
