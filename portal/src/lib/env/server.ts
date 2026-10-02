@@ -22,7 +22,9 @@ const serverEnvSchema = z.object({
 
 export function getServerEnv() {
   const server = serverEnvSchema.parse({
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    SUPABASE_SERVICE_ROLE_KEY:
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_SECRET_KEY,
     SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET || undefined,
     INVITE_EXPIRES_MINUTES: process.env.INVITE_EXPIRES_MINUTES,
     LEAD_INGEST_SHARED_SECRET: process.env.LEAD_INGEST_SHARED_SECRET,
