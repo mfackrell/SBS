@@ -35,7 +35,10 @@ export async function consumePortalRateLimit(
     ip: requestIp(requestHeaders),
     userAgent: requestUserAgent(requestHeaders),
     subject,
-    salt: env.SECURITY_RATE_LIMIT_SALT ?? env.LEAD_RATE_LIMIT_SALT,
+    salt:
+      env.SECURITY_RATE_LIMIT_SALT ??
+      env.LEAD_RATE_LIMIT_SALT ??
+      env.SUPABASE_SERVICE_ROLE_KEY,
   });
 
   const admin = createAdminSupabaseClient();
