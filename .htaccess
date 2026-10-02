@@ -1,0 +1,17 @@
+# Strategic Business Services Apache redirect template
+RewriteEngine On
+
+# Legacy domain: preserve the requested path on the new domain.
+RewriteCond %{HTTP_HOST} ^(www\.)?tfgboise\.com$ [NC]
+RewriteRule ^(.*)$ https://contract-cfo.com/$1 [R=301,L,NE]
+
+# CONFIRM against the real old URL list before launch.
+# Remove or revise any rule that does not match an actual historical URL.
+RewriteRule ^bookkeeping/?$ /month-end-close/ [R=301,L]
+RewriteRule ^controllership/?$ /controllership/ [R=301,L]
+RewriteRule ^e-commerce/?$ /ecommerce-accounting/ [R=301,L]
+RewriteRule ^ecommerce/?$ /ecommerce-accounting/ [R=301,L]
+RewriteRule ^fractional-cfo/?$ /consulting/ [R=301,L]
+RewriteRule ^international/?$ /consulting/ [R=301,L]
+
+# Email forwarding for the legacy domain is configured at the email host, not in this site.
