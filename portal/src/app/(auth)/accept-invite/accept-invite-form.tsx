@@ -41,16 +41,20 @@ export function AcceptInviteForm({ inviteId }: AcceptInviteFormProps) {
   });
 
   useEffect(() => {
-    const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-    const token = fragment.get("token") ?? "";
+    const frame = window.requestAnimationFrame(() => {
+      const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const token = fragment.get("token") ?? "";
 
-    if (!inviteId || !token) {
-      setLinkState("missing");
-      return;
-    }
+      if (!inviteId || !token) {
+        setLinkState("missing");
+        return;
+      }
 
-    setInviteToken(token);
-    setLinkState("ready");
+      setInviteToken(token);
+      setLinkState("ready");
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, [inviteId]);
 
   const onSubmit = handleSubmit(async (values) => {
