@@ -176,3 +176,6 @@ export async function POST() {
     expires_at: expiresAt,
   });
 }
+
+
+export const GET = POST;
