@@ -143,7 +143,16 @@ with check (
   bucket_id = 'private-documents'
   and public.document_path_org_id(name) is not null
   and public.is_org_member(public.document_path_org_id(name))
-  and lower(name) !~ '\\.(exe|dll|js|mjs|cjs|sh|bash|bat|cmd|com|scr|msi|ps1|vbs|jar|php|py|rb)
+  and lower(name) !~ '\\.(exe|dll|js|mjs|cjs|sh|bash|bat|cmd|com|scr|msi|ps1|vbs|jar|php|py|rb)$'
+  and exists (
+    select 1
+    from public.document_upload_intents i
+    where i.storage_path = name
+      and i.created_by = auth.uid()
+      and i.completed_at is null
+      and i.expires_at > now()
+  )
+);
 
 create or replace function public.create_portal_document_request(
   p_org_id uuid,
