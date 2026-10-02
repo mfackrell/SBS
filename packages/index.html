@@ -115,18 +115,24 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <!-- Text wordmark fallback. Replace this one element when a verified logo file is supplied. -->
-      <a class="wordmark" href="/" aria-label="Strategic Business Services home">Strategic Business Services</a>
+      <a class="brand" href="/" aria-label="Strategic Business Services home">
+        <span class="brand-mark" aria-hidden="true">SBS</span>
+        <span class="brand-name">Strategic Business Services</span>
+      </a>
 
       <nav class="desktop-nav" aria-label="Primary navigation">
-        <a href="/">Home</a>
-        <a href="/packages/">Packages &amp; Pricing</a>
-        <a href="/month-end-close/">Month-End Close</a>
-        <a href="/controllership/">Controllership</a>
-        <a href="/ecommerce-accounting/">Ecommerce Accounting</a>
+        <details class="nav-dropdown">
+          <summary>Services</summary>
+          <div class="nav-dropdown__menu">
+            <a href="/month-end-close/"><strong>Month-End Close</strong><span>Documented monthly close and reporting</span></a>
+            <a href="/controllership/"><strong>Controllership</strong><span>Controller oversight and analysis</span></a>
+            <a href="/ecommerce-accounting/"><strong>Ecommerce Accounting</strong><span>Payouts, channels and inventory support</span></a>
+          </div>
+        </details>
+        <a href="/packages/">Packages</a>
         <a href="/how-it-works/">How It Works</a>
-        <a href="/about/">About &amp; Team</a>
-        <a href="/consulting/">Additional Consulting</a>
+        <a href="/about/">About</a>
+        <a href="/consulting/">Consulting</a>
       </nav>
 
       <a class="button button--primary header-cta" href="/book/" data-track="cta_click" data-track-location="header" aria-label="Book a Month-End Close Review">
@@ -143,14 +149,15 @@
 
     <div id="mobile-menu" class="mobile-menu" data-mobile-menu hidden>
       <nav class="container" aria-label="Mobile navigation">
-        <a href="/">Home</a>
-        <a href="/packages/">Packages &amp; Pricing</a>
+        <span class="mobile-menu__label">Services</span>
         <a href="/month-end-close/">Month-End Close</a>
         <a href="/controllership/">Controllership</a>
         <a href="/ecommerce-accounting/">Ecommerce Accounting</a>
+        <span class="mobile-menu__divider" aria-hidden="true"></span>
+        <a href="/packages/">Packages</a>
         <a href="/how-it-works/">How It Works</a>
-        <a href="/about/">About &amp; Team</a>
-        <a href="/consulting/">Additional Consulting</a>
+        <a href="/about/">About</a>
+        <a href="/consulting/">Consulting</a>
       </nav>
     </div>
   </header>
@@ -168,6 +175,36 @@
     <section class="section section--surface">
       <div class="container">
         <!-- Launch gate: response-time promises and the named-controller commitment must be confirmed deliverable by the owner. -->
+        <div class="plan-summary-grid" aria-label="Package overview">
+          <article class="plan-summary">
+            <span class="plan-summary__name">Silver</span>
+            <h2>Essentials</h2>
+            <p class="plan-summary__price">$650<span>/month</span></p>
+            <p>For simpler books that need consistent reconciliation and monthly statements.</p>
+          </article>
+          <article class="plan-summary plan-summary--featured">
+            <span class="tag">Recommended</span>
+            <span class="plan-summary__name">Gold</span>
+            <h2>Complete Close</h2>
+            <p class="plan-summary__price">$1,500<span>/month</span></p>
+            <p>For established businesses that need a full documented close and balance sheet review.</p>
+          </article>
+          <article class="plan-summary">
+            <span class="plan-summary__name">Platinum</span>
+            <h2>Controller</h2>
+            <p class="plan-summary__price">$3,000<span>/month</span></p>
+            <p>For higher-volume businesses that need controller ownership, profitability reporting and analysis.</p>
+          </article>
+        </div>
+
+        <div class="pricing-table-intro">
+          <div>
+            <p class="eyebrow">Detailed comparison</p>
+            <h2>Compare what is included</h2>
+          </div>
+          <p>Use the detailed table for scope. The three summaries above are the fastest way to choose where to start.</p>
+        </div>
+
         <div class="pricing-table-wrap" tabindex="0" role="region" aria-label="Bookkeeping and month-end close package comparison">
           <table class="pricing-table">
             <caption>Silver, Gold and Platinum package comparison</caption>
@@ -183,6 +220,9 @@
               </tr>
             </thead>
             <tbody>
+            <tr class="pricing-group-row">
+              <th scope="rowgroup" colspan="4">Plan fit</th>
+            </tr>
             <tr>
               <th scope="row">Starting at</th>
               <td>$650/month</td>
@@ -200,6 +240,9 @@
               <td>About 100 transactions/month, 2–3 bank/card accounts, 1 entity</td>
               <td class="pricing-table__gold">About 250 transactions/month, up to 6 accounts, up to 2 channels or processors, 1 entity</td>
               <td>About 500 transactions/month or 2 entities, up to 4 channels</td>
+            </tr>
+            <tr class="pricing-group-row">
+              <th scope="rowgroup" colspan="4">Monthly close</th>
             </tr>
             <tr>
               <th scope="row">Monthly categorization and reconciliations</th>
@@ -237,6 +280,9 @@
               <td class="pricing-table__gold"><span aria-hidden="true">✓</span><span class="sr-only">Included</span></td>
               <td><span aria-hidden="true">✓</span><span class="sr-only">Included</span></td>
             </tr>
+            <tr class="pricing-group-row">
+              <th scope="rowgroup" colspan="4">Reporting and oversight</th>
+            </tr>
             <tr>
               <th scope="row">Profitability and KPI reporting (by product line, channel or location)</th>
               <td><span aria-hidden="true">—</span><span class="sr-only">Not included</span></td>
@@ -272,6 +318,9 @@
               <td><span aria-hidden="true">✓</span><span class="sr-only">Included</span></td>
               <td class="pricing-table__gold"><span aria-hidden="true">✓</span><span class="sr-only">Included</span></td>
               <td><span aria-hidden="true">✓</span><span class="sr-only">Included</span></td>
+            </tr>
+            <tr class="pricing-group-row">
+              <th scope="rowgroup" colspan="4">Service and support</th>
             </tr>
             <tr>
               <th scope="row">Review meeting</th>
