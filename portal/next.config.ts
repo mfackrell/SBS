@@ -11,8 +11,19 @@ const securityHeaders = [
   },
 ];
 
+const inferredAppUrl =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000");
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  env: {
+    NEXT_PUBLIC_APP_URL: inferredAppUrl,
+  },
   async headers() {
     return [
       {
