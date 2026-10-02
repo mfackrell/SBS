@@ -2,7 +2,7 @@
 
 This directory is a standalone Next.js application for the authenticated Strategic Business Services client portal. It is intentionally isolated from the static marketing site in the repository root.
 
-## Architecture through Phase 3
+## Architecture through Phase 4
 
 - Next.js App Router + TypeScript
 - Supabase Auth and Postgres
@@ -16,6 +16,9 @@ This directory is a standalone Next.js application for the authenticated Strateg
 - Secure marketing-site lead ingestion through a shared-secret server proxy
 - Database-backed lead rate limiting and 15-minute exact-duplicate suppression
 - Admin lead inbox, detail history, status workflow, and lead-to-organization conversion
+- Versioned proposal builder with locked sent versions
+- Client proposal review, typed acceptance, decline, and immutable acceptance snapshots
+- Proposal lifecycle audit events
 - No payment collection or public registration
 
 The database role `owner` is the admin-equivalent organization role. Application navigation may describe owner-level users as admins while retaining `owner|staff|client` in the database.
@@ -178,13 +181,42 @@ Conversion:
 4. Optionally creates and sends a client invitation for the lead's primary contact.
 5. Sets `organizations.primary_contact_id` to the invited Auth user when that invitation succeeds.
 
+## Proposal workflow
+
+Phase 4 uses a **locked-after-send + explicit new-version** policy:
+
+1. Staff creates a draft proposal.
+2. Draft title, expiration, line items, pricing, and terms can be edited.
+3. Sending changes the version to `sent`, records `sent_at`, makes it visible to client members, and locks that version.
+4. A sent/viewed/declined/expired version can be copied into a new draft version. Accepted proposals cannot be versioned.
+5. Sending a new version marks older open sent/viewed versions in the same proposal series as expired.
+6. The database enforces one accepted version per proposal series.
+
+“Send” in Phase 4 means make the locked proposal version available in the authenticated client portal. No proposal-email provider is added in this phase.
+
+Client proposal views automatically record the first `viewed` transition. Acceptance requires an explicit acceptance-statement checkbox plus typed full name. The database records:
+
+- authenticated user id and email
+- typed accepted name
+- acceptance timestamp
+- IP address when available
+- user agent when available
+- fixed acceptance-statement text
+- immutable JSON snapshot containing proposal identity, version, total, terms, expiration, and all line items
+
+The acceptance snapshot is stored separately in `proposal_acceptances`. Direct browser mutation policies for proposals and line items are removed; staff edits/sends/versioning and client accept/decline actions go through guarded database functions.
+
+Proposal lifecycle audit events include `proposal.created`, `proposal.updated`, `proposal.sent`, `proposal.viewed`, `proposal.accepted`, `proposal.declined`, and `proposal.expired`.
+
+There is no payment collection and no third-party e-signature provider in this phase.
+
 ## Deployment model
 
 Create a separate Vercel project from this same GitHub repository and set **Root Directory** to `portal`. This prevents the portal build from changing the existing static marketing-site deployment.
 
 A portal hostname can be attached later. Routes remain `/login`, `/accept-invite`, `/app/*`, and `/admin/*` relative to that portal host.
 
-## Implemented through Phase 3
+## Implemented through Phase 4
 
 - Project structure and dependency scaffolding
 - Environment validation and configuration
@@ -215,12 +247,20 @@ A portal hostname can be attached later. Routes remain `/login`, `/accept-invite
 - Lead status management
 - Lead-to-organization conversion
 - Optional primary-contact invitation on conversion
+- Typed proposal create/update/send/accept/decline contracts
+- Admin proposal list, create flow, and line-item builder
+- Locked sent proposal versions with explicit new-version creation
+- Client proposal list and proposal detail view
+- First-view tracking
+- Explicit typed acceptance and optional decline reason
+- Immutable accepted proposal snapshot
+- One accepted version per proposal series enforcement
+- Proposal lifecycle audit events
 
 ## Pending
 
-Phase 4 and later still need:
+Phase 5 and later still need:
 
-- Proposal workflow
 - Private document storage and signed URLs
 - Messaging and read tracking
 - Close status UI/workflow

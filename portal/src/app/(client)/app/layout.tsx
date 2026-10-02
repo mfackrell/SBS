@@ -20,7 +20,8 @@ export default async function ClientAppLayout({
 
       <div className="portal-body">
         <nav className="portal-nav" aria-label="Client portal">
-          <Link href="/app/dashboard" aria-current="page">Dashboard</Link>
+          <Link href="/app/dashboard">Dashboard</Link>
+          <Link href="/app/proposals">Proposals</Link>
         </nav>
         <main className="portal-main">{children}</main>
       </div>

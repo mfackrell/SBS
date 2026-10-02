@@ -23,6 +23,7 @@ export default async function AdminAppLayout({
           <Link href="/admin/dashboard">Dashboard</Link>
           <Link href="/admin/leads">Leads</Link>
           <Link href="/admin/organizations">Organizations</Link>
+          <Link href="/admin/proposals">Proposals</Link>
         </nav>
         <main className="portal-main">{children}</main>
       </div>
