@@ -15,6 +15,8 @@ const notices: Record<string, string> = {
   "invite-resent": "Invitation resent.",
   "invite-revoked": "Invitation revoked.",
   "membership-updated": "Membership updated.",
+  "lead-converted": "Lead converted to this organization.",
+  "lead-converted-invited": "Lead converted and the primary contact invitation was sent.",
 };
 
 const errors: Record<string, string> = {
@@ -29,6 +31,8 @@ const errors: Record<string, string> = {
   "last-owner": "Every organization must keep at least one active owner.",
   "membership-permission": "Staff users may manage client memberships only.",
   "membership-failed": "The membership could not be updated.",
+  "lead-invite-failed": "The lead was converted, but the primary-contact invitation could not be created.",
+  "lead-invite-delivery": "The lead was converted, but the primary-contact invitation email could not be delivered.",
 };
 
 function inviteStatus(invite: {

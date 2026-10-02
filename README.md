@@ -131,3 +131,15 @@ The following have not been measured or tested:
 - Real-device behavior
 
 Contrast, accessibility and performance characteristics in the source are design intent, not measured results.
+
+
+## Portal lead proxy
+
+Phase 3 adds `/api/lead-intake` to the marketing-site deployment. After the proxy environment is configured, set `SBS_CONFIG.endpoints.leadFormEndpoint` in `assets/js/main.js` to `"/api/lead-intake"`. The serverless proxy forwards the submission to the separate portal project's secure lead endpoint.
+
+Set these environment variables on the **marketing-site Vercel project**:
+
+- `PORTAL_LEAD_INTAKE_URL`: full portal endpoint, for example `https://<portal-host>/api/lead-intake`
+- `LEAD_INGEST_SHARED_SECRET`: same random server-only value configured on the portal project
+
+Do not put either value into browser JavaScript. The public form uses the same-origin proxy specifically to keep the shared secret server-side.

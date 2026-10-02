@@ -2,7 +2,7 @@
 
 This directory is a standalone Next.js application for the authenticated Strategic Business Services client portal. It is intentionally isolated from the static marketing site in the repository root.
 
-## Architecture through Phase 2
+## Architecture through Phase 3
 
 - Next.js App Router + TypeScript
 - Supabase Auth and Postgres
@@ -12,7 +12,10 @@ This directory is a standalone Next.js application for the authenticated Strateg
 - Organization-scoped server guards
 - Server-only service-role client isolated from browser modules
 - Zod validation and React Hook Form on invite acceptance
-- Audit logging for organization and invite/membership lifecycle events
+- Audit logging for organization, invite/membership, and lead lifecycle events
+- Secure marketing-site lead ingestion through a shared-secret server proxy
+- Database-backed lead rate limiting and 15-minute exact-duplicate suppression
+- Admin lead inbox, detail history, status workflow, and lead-to-organization conversion
 - No payment collection or public registration
 
 The database role `owner` is the admin-equivalent organization role. Application navigation may describe owner-level users as admins while retaining `owner|staff|client` in the database.
@@ -59,6 +62,8 @@ npm run build
 - `SUPABASE_SERVICE_ROLE_KEY`: server-only Supabase administrative credential.
 - `SUPABASE_JWT_SECRET`: optional; leave unset unless a later server integration needs direct JWT verification.
 - `INVITE_EXPIRES_MINUTES`: application invite lifetime. Keep it aligned with Supabase Auth Email OTP Expiration. The default is 60 minutes.
+- `LEAD_INGEST_SHARED_SECRET`: random server-only secret shared only by the marketing proxy and portal ingestion endpoint. Use at least 32 characters.
+- `LEAD_RATE_LIMIT_SALT`: separate random server-only value used to HMAC client IP/user-agent fingerprints before rate-limit storage.
 - `SMTP_*`: reserved for a future external email provider. Phase 2 uses Supabase-managed invitation email.
 - `RATE_LIMIT_WINDOW_SECONDS` and `RATE_LIMIT_MAX_REQUESTS`: security configuration used beginning with lead/invite endpoint hardening.
 - `FILE_UPLOAD_MAX_MB` and `ALLOWED_MIME_TYPES`: document-upload limits used in the documents phase.
@@ -142,13 +147,44 @@ Existing helpers remain:
 - `org_role(org_id)`
 - `can_manage_org(org_id)`
 
+## Marketing-site lead integration
+
+Phase 3 adds a same-origin `/api/lead-intake` function to the marketing project. After the server environment is configured, set `SBS_CONFIG.endpoints.leadFormEndpoint` in the marketing site's `assets/js/main.js` to `"/api/lead-intake"`. That function contains no Supabase credentials. It forwards the validated request boundary to the portal's `POST /api/lead-intake` route and adds the server-only shared secret.
+
+Configure the **marketing-site Vercel project** with:
+
+- `PORTAL_LEAD_INTAKE_URL=https://YOUR_PORTAL_HOST/api/lead-intake`
+- `LEAD_INGEST_SHARED_SECRET=<same random value used by the portal>`
+
+Configure the **portal Vercel project** with:
+
+- `LEAD_INGEST_SHARED_SECRET=<same value>`
+- `LEAD_RATE_LIMIT_SALT=<different random value>`
+- the existing Supabase variables
+
+Until `PORTAL_LEAD_INTAKE_URL` and the shared secret are set on the marketing project, leave the browser endpoint disabled. The proxy itself intentionally returns HTTP 503 when unconfigured.
+
+The portal ingestion endpoint validates the request with Zod, requires consent, silently drops populated honeypots with HTTP 200, applies a database-backed rate limit, suppresses an exact duplicate within 15 minutes, writes the lead, writes `lead_events`, and returns `{ ok, lead_id }`.
+
+## Lead conversion
+
+Staff can filter `/admin/leads` by `new`, `contacted`, `converted`, or `not_fit`, open a lead detail page, update status, and convert a lead into an organization.
+
+Conversion:
+
+1. Atomically creates the organization and grants the converting staff user owner access to that organization.
+2. Marks the lead converted and links `converted_org_id`.
+3. Writes lead and organization audit events.
+4. Optionally creates and sends a client invitation for the lead's primary contact.
+5. Sets `organizations.primary_contact_id` to the invited Auth user when that invitation succeeds.
+
 ## Deployment model
 
 Create a separate Vercel project from this same GitHub repository and set **Root Directory** to `portal`. This prevents the portal build from changing the existing static marketing-site deployment.
 
 A portal hostname can be attached later. Routes remain `/login`, `/accept-invite`, `/app/*`, and `/admin/*` relative to that portal host.
 
-## Implemented through Phase 2
+## Implemented through Phase 3
 
 - Project structure and dependency scaffolding
 - Environment validation and configuration
@@ -168,13 +204,22 @@ A portal hostname can be attached later. Routes remain `/login`, `/accept-invite
 - Invite lifecycle and membership audit events
 - Client and staff protected layout shells
 - Invite-only login
+- Typed lead-intake request/response contract
+- Secure `POST /api/lead-intake`
+- Marketing-site same-origin lead proxy
+- Honeypot and database-backed rate limiting
+- Exact-duplicate suppression
+- Lead + UTM/routing persistence
+- Admin leads inbox with status filters
+- Lead detail/event history
+- Lead status management
+- Lead-to-organization conversion
+- Optional primary-contact invitation on conversion
 
 ## Pending
 
-Phase 3 and later still need:
+Phase 4 and later still need:
 
-- Lead ingestion and marketing-site `/book` integration
-- Admin leads inbox and lead-to-organization conversion
 - Proposal workflow
 - Private document storage and signed URLs
 - Messaging and read tracking

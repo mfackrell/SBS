@@ -19,7 +19,7 @@ const SBS_CONFIG = {
     enabled: false
   },
   endpoints: {
-    leadFormEndpoint: "",
+    leadFormEndpoint: "", // Phase 3: set to "/api/lead-intake" only after the marketing proxy env is configured.
     schedulerEmbedUrl: ""
   },
   routing: {
