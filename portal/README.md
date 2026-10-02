@@ -278,7 +278,7 @@ Staff manages close periods inside each organization's admin page rather than th
 
 Clients view periods at `/app/close-status`. The page shows the current status, client-visible notes, and a timeline from `close_period_events`. UI copy intentionally does not promise fixed close dates.
 
-Creating a period writes `close.created`. Updating its status writes the required `close.status_changed` audit event; notes-only updates write `close.notes_updated`. Internal event hooks emit `close_period_created` and `close_status_changed` as supplemental telemetry.
+Creating a period writes `close.created`. Updating its status writes the required `close.status_changed` audit event; notes-only updates write `close.notes_updated`. Internal event hooks emit `close_period_created` and `close_period_updated` as supplemental telemetry.
 
 ## Client dashboard
 
@@ -352,12 +352,12 @@ A portal hostname can be attached later. Routes remain `/login`, `/accept-invite
 - Upload/download/delete access logs and audit events
 - Staff soft-delete + storage cleanup
 - Explicit virus-scanning TODO hook
-- Typed message send/create/read contracts
+- Typed message create/send/list/read request/response contracts
 - Per-organization message threads and participants
 - Plain-text client/staff message composer
 - Per-user message read tracking and unread counts
 - Client and admin message routes
-- Typed close-period create/update contracts
+- Typed close-period create/update/list request/response contracts
 - Monthly close-period staff manager
 - Client-visible close-status history and notes
 - Required `close.status_changed` audit events

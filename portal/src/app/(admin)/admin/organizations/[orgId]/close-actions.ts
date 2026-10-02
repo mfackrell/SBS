@@ -83,7 +83,7 @@ export async function updateClosePeriod(formData: FormData) {
   }
 
   await emitInternalEvent({
-    name: "close_status_changed",
+    name: "close_period_updated",
     orgId: parsed.data.orgId,
     actorUserId: context.user.id,
     entityType: "close_period",

@@ -28,3 +28,37 @@ export function monthEndFromStart(periodStart: string) {
   const end = new Date(Date.UTC(year, month, 0));
   return end.toISOString().slice(0, 10);
 }
+
+
+export const closePeriodRecordSchema = z.object({
+  id: z.string().uuid(),
+  org_id: z.string().uuid(),
+  period_label: z.string(),
+  period_start: z.string(),
+  period_end: z.string(),
+  status: closeStatusSchema,
+  notes: z.string().nullable(),
+  updated_at: z.string(),
+});
+
+export const closePeriodEventSchema = z.object({
+  id: z.string().uuid(),
+  close_period_id: z.string().uuid(),
+  from_status: closeStatusSchema.nullable(),
+  to_status: closeStatusSchema,
+  notes_snapshot: z.string().nullable(),
+  created_at: z.string(),
+});
+
+export const closePeriodListResponseSchema = z.array(closePeriodRecordSchema);
+
+export const closePeriodMutationResponseSchema = z.object({
+  ok: z.boolean(),
+  closePeriodId: z.string().uuid().nullable(),
+  error: z.string().nullable(),
+});
+
+export type ClosePeriodRecord = z.infer<typeof closePeriodRecordSchema>;
+export type ClosePeriodEvent = z.infer<typeof closePeriodEventSchema>;
+export type ClosePeriodListResponse = z.infer<typeof closePeriodListResponseSchema>;
+export type ClosePeriodMutationResponse = z.infer<typeof closePeriodMutationResponseSchema>;
