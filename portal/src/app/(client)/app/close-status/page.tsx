@@ -1,5 +1,6 @@
 import { requireClientUser } from "@/lib/auth/guards";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { relatedName } from "@/lib/data/relations";
 
 const statusLabels: Record<string, string> = {
   pending_records: "Pending records",
@@ -48,7 +49,7 @@ export default async function ClientCloseStatusPage() {
               <article className="close-status-card" key={period.id}>
                 <header>
                   <div>
-                    <span className="document-kind">{period.organizations?.name ?? "Your organization"}</span>
+                    <span className="document-kind">{relatedName(period.organizations) ?? "Your organization"}</span>
                     <h2>{period.period_label}</h2>
                     <p>{period.period_start} through {period.period_end}</p>
                   </div>

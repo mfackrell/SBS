@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireClientUser } from "@/lib/auth/guards";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { relatedName } from "@/lib/data/relations";
 
 function money(cents: number | null, currency: string) {
   return new Intl.NumberFormat("en-US", {
@@ -36,7 +37,7 @@ export default async function ClientProposalsPage() {
                 <div>
                   <span className="status-chip">{proposal.status}</span>
                   <h2>{proposal.title}</h2>
-                  <p>{proposal.organizations?.name ?? "Your organization"} · Version {proposal.version}</p>
+                  <p>{relatedName(proposal.organizations) ?? "Your organization"} · Version {proposal.version}</p>
                 </div>
                 <div className="proposal-card__amount">
                   <strong>{money(proposal.subtotal_cents, proposal.currency)}</strong>

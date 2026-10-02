@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { markThreadRead } from "./actions";
 import { MessageComposer } from "./message-composer";
+import { relatedName } from "@/lib/data/relations";
 
 type ThreadViewProps = {
   threadId: string;
@@ -46,7 +47,7 @@ export async function ThreadView({ threadId, basePath, staffView }: ThreadViewPr
     <>
       <div className="page-heading page-heading--split">
         <div>
-          <p className="portal-eyebrow">{thread.organizations?.name ?? "Organization"} · Messages</p>
+          <p className="portal-eyebrow">{relatedName(thread.organizations) ?? "Organization"} · Messages</p>
           <h1>{thread.subject}</h1>
           <p>Plain-text conversation within this organization workspace.</p>
         </div>

@@ -3,6 +3,7 @@ import { DocumentUploader } from "@/app/(shared)/document-uploader";
 import { requireClientUser } from "@/lib/auth/guards";
 import { getServerEnv } from "@/lib/env/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { relatedName } from "@/lib/data/relations";
 
 function formatBytes(value: number) {
   if (value < 1024 * 1024) return `${Math.max(1, Math.round(value / 1024))} KB`;
@@ -62,7 +63,7 @@ export default async function ClientRequestsPage() {
                   <div>
                     <span className="status-chip">{request.status}</span>
                     <h2>{request.title}</h2>
-                    <p>{request.organizations?.name ?? "Your organization"}</p>
+                    <p>{relatedName(request.organizations) ?? "Your organization"}</p>
                   </div>
                   <div className="request-card__due">
                     <span>Due</span>

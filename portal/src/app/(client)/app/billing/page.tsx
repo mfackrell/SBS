@@ -1,5 +1,6 @@
 import { requireClientUser } from "@/lib/auth/guards";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { relatedName } from "@/lib/data/relations";
 
 function safeHttpsUrl(value: string | null) {
   if (!value) return null;
@@ -46,7 +47,7 @@ export default async function ClientBillingPage() {
             return (
               <article className="billing-card" key={profile.id}>
                 <header>
-                  <span className="document-kind">{profile.organizations?.name ?? "Your organization"}</span>
+                  <span className="document-kind">{relatedName(profile.organizations) ?? "Your organization"}</span>
                   <h2>Billing reference</h2>
                 </header>
 

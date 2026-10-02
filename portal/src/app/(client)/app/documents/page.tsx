@@ -1,6 +1,7 @@
 import { DocumentDownloadButton } from "@/app/(shared)/document-download-button";
 import { requireClientUser } from "@/lib/auth/guards";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { relatedName } from "@/lib/data/relations";
 
 function formatBytes(value: number) {
   if (value < 1024 * 1024) return `${Math.max(1, Math.round(value / 1024))} KB`;
@@ -35,7 +36,7 @@ export default async function ClientDocumentsPage() {
                   <span className="document-kind">{document.category === "staff_deliverable" ? "SBS deliverable" : document.category.replace("_", " ")}</span>
                   <strong>{document.file_name}</strong>
                   <small>
-                    {document.organizations?.name ?? "Your organization"} · Revision {document.revision} · {formatBytes(Number(document.size_bytes))} · {new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(document.created_at))}
+                    {relatedName(document.organizations) ?? "Your organization"} · Revision {document.revision} · {formatBytes(Number(document.size_bytes))} · {new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(document.created_at))}
                   </small>
                 </div>
                 <div className="document-row__actions">

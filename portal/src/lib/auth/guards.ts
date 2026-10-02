@@ -40,10 +40,10 @@ async function getAuthContext(): Promise<AuthContext> {
   }
 
   const memberships = (membershipRows ?? [])
-    .filter((row): row is { org_id: string; role: string; status: string } =>
-      Boolean(row.org_id && row.role && row.status),
+    .filter(
+      (row): row is { org_id: string; role: OrgRole; status: string } =>
+        Boolean(row.org_id && row.role && row.status) && isOrgRole(row.role),
     )
-    .filter((row) => isOrgRole(row.role))
     .map((row) => ({
       org_id: row.org_id,
       role: row.role,

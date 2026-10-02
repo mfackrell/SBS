@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStaffUser } from "@/lib/auth/guards";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createDocumentRequest } from "./actions";
+import { relatedName } from "@/lib/data/relations";
 
 type RequestsPageProps = {
   searchParams: Promise<{ status?: string; error?: string }>;
@@ -106,7 +107,7 @@ export default async function AdminRequestsPage({ searchParams }: RequestsPagePr
                 <span>
                   <strong>{request.title}</strong>
                   <small>
-                    {request.organizations?.name ?? "Organization"}
+                    {relatedName(request.organizations) ?? "Organization"}
                     {request.due_date ? ` · due ${new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(`${request.due_date}T12:00:00Z`))}` : ""}
                   </small>
                 </span>

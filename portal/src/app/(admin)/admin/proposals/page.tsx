@@ -3,6 +3,7 @@ import { requireStaffUser } from "@/lib/auth/guards";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createProposal } from "./actions";
+import { relatedName } from "@/lib/data/relations";
 
 type ProposalsPageProps = {
   searchParams: Promise<{ status?: string; error?: string }>;
@@ -152,7 +153,7 @@ export default async function ProposalsPage({ searchParams }: ProposalsPageProps
                 {proposals.map((proposal) => (
                   <tr key={proposal.id}>
                     <td><Link className="table-link" href={`/admin/proposals/${proposal.id}`}>{proposal.title}</Link></td>
-                    <td>{proposal.organizations?.name ?? "—"}</td>
+                    <td>{relatedName(proposal.organizations) ?? "—"}</td>
                     <td>v{proposal.version}</td>
                     <td>{money(proposal.subtotal_cents, proposal.currency.trim())}</td>
                     <td><span className="status-chip">{proposal.status}</span></td>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireClientUser } from "@/lib/auth/guards";
 import { getUnreadMessageCount } from "@/lib/messages/queries";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { relatedName } from "@/lib/data/relations";
 
 const closeStatusLabels: Record<string, string> = {
   pending_records: "Pending records",
@@ -72,7 +73,7 @@ export default async function ClientDashboardPage() {
             <>
               <strong>{latestProposal.title}</strong>
               <span className="status-chip">{latestProposal.status}</span>
-              <small>{latestProposal.organizations?.name ?? "Your organization"} · Version {latestProposal.version}</small>
+              <small>{relatedName(latestProposal.organizations) ?? "Your organization"} · Version {latestProposal.version}</small>
             </>
           ) : (
             <>
@@ -88,7 +89,7 @@ export default async function ClientDashboardPage() {
             <>
               <strong>{latestClose.period_label}</strong>
               <span className="status-chip">{closeStatusLabels[latestClose.status] ?? latestClose.status}</span>
-              <small>{latestClose.organizations?.name ?? "Your organization"}</small>
+              <small>{relatedName(latestClose.organizations) ?? "Your organization"}</small>
             </>
           ) : (
             <>
