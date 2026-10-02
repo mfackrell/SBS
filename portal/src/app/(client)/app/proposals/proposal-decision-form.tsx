@@ -91,7 +91,7 @@ export function ProposalDecisionForm({ proposalId }: ProposalDecisionFormProps) 
     });
 
     if (!result.ok) {
-      setServerMessage(result.error);
+      setServerMessage(result.error ?? "The proposal action could not be completed.");
       setWorking(false);
       return;
     }
