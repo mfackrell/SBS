@@ -2,7 +2,7 @@
 
 This directory is a standalone Next.js application for the authenticated Strategic Business Services client portal. It is intentionally isolated from the static marketing site in the repository root.
 
-## Architecture through Phase 4
+## Architecture through Phase 5
 
 - Next.js App Router + TypeScript
 - Supabase Auth and Postgres
@@ -19,6 +19,9 @@ This directory is a standalone Next.js application for the authenticated Strateg
 - Versioned proposal builder with locked sent versions
 - Client proposal review, typed acceptance, decline, and immutable acceptance snapshots
 - Proposal lifecycle audit events
+- Private document requests, uploads, deliverables, signed downloads, and revision metadata
+- Private Supabase Storage bucket with org-path upload policy and no public read policy
+- Clearly marked virus-scanning integration hook that is not yet a scanning control
 - No payment collection or public registration
 
 The database role `owner` is the admin-equivalent organization role. Application navigation may describe owner-level users as admins while retaining `owner|staff|client` in the database.
@@ -69,7 +72,7 @@ npm run build
 - `LEAD_RATE_LIMIT_SALT`: separate random server-only value used to HMAC client IP/user-agent fingerprints before rate-limit storage.
 - `SMTP_*`: reserved for a future external email provider. Phase 2 uses Supabase-managed invitation email.
 - `RATE_LIMIT_WINDOW_SECONDS` and `RATE_LIMIT_MAX_REQUESTS`: security configuration used beginning with lead/invite endpoint hardening.
-- `FILE_UPLOAD_MAX_MB` and `ALLOWED_MIME_TYPES`: document-upload limits used in the documents phase.
+- `FILE_UPLOAD_MAX_MB` and `ALLOWED_MIME_TYPES`: document-upload limits. Keep `FILE_UPLOAD_MAX_MB` at or below the private bucket's 25 MB hard cap. The application and bucket both restrict uploads to PDF, CSV, XLSX, DOCX, PNG, and JPG/JPEG MIME types.
 - `QBO_BILLING_BASE_URL`: optional reference-link base only. The portal does not process payments.
 - `FEATURE_FLAGS`: optional comma-separated feature flags.
 
@@ -210,13 +213,47 @@ Proposal lifecycle audit events include `proposal.created`, `proposal.updated`, 
 
 There is no payment collection and no third-party e-signature provider in this phase.
 
+## Documents and requests
+
+Phase 5 creates the private Supabase Storage bucket `private-documents`. Its path convention is:
+
+```text
+org/{org_id}/documents/{document_id}/{filename}
+```
+
+The bucket is private. There is no authenticated `SELECT` policy on `storage.objects`; downloads are issued only as short-lived signed URLs after the application confirms the document row is visible to the authenticated user's organization. The storage insert policy limits direct authenticated uploads to an active member's organization path. The implemented portal uploader uses a server-authorized signed upload token and never exposes a public bucket URL.
+
+Upload flow:
+
+1. Browser sends file metadata to `POST /api/documents/upload-intent`.
+2. Zod validates the request. The server checks configured file-size limit, allowed MIME type, organization membership, category permissions, request scope, and optional revision target.
+3. The server creates a short-lived database upload intent and a signed Supabase upload token for a new immutable document path.
+4. Browser uploads directly to the private bucket with `uploadToSignedUrl`.
+5. Browser calls `POST /api/documents/complete-upload`.
+6. The database verifies the storage object exists, writes document metadata, revision/uploader/timestamp data, document access log, and `document.uploaded` audit event.
+7. Client uploads attached to an open request move that request to `submitted`.
+
+Document revisions receive a new document id and a new storage path. `document_series_id`, `revision`, and `supersedes_document_id` retain the version chain; stored objects are never overwritten in place.
+
+Download flow:
+
+- `POST /api/documents/signed-url` authorizes the document through RLS.
+- The server creates a 60-second signed URL using the service-role Storage client.
+- `document.downloaded` and `document_access_logs` are recorded before the URL is returned.
+
+Staff deletion is a soft delete in Postgres followed by private-object cleanup. The metadata and audit evidence remain retained while the deleted row becomes invisible through normal document RLS.
+
+### Virus scanning status
+
+**TODO: malware/virus scanning is not implemented yet.** `src/lib/security/virus-scan.ts` is an explicit provider-neutral hook for the production scanning integration. It currently emits a structured internal event stating `scanning_implemented: false`. MIME allowlisting, size limits, private storage, and blocked executable/script extensions are implemented, but none of those should be represented as malware scanning.
+
 ## Deployment model
 
 Create a separate Vercel project from this same GitHub repository and set **Root Directory** to `portal`. This prevents the portal build from changing the existing static marketing-site deployment.
 
 A portal hostname can be attached later. Routes remain `/login`, `/accept-invite`, `/app/*`, and `/admin/*` relative to that portal host.
 
-## Implemented through Phase 4
+## Implemented through Phase 5
 
 - Project structure and dependency scaffolding
 - Environment validation and configuration
@@ -256,12 +293,26 @@ A portal hostname can be attached later. Routes remain `/login`, `/accept-invite
 - Immutable accepted proposal snapshot
 - One accepted version per proposal series enforcement
 - Proposal lifecycle audit events
+- Staff document-request create/status workflow
+- Client request list and requested-document upload
+- Staff deliverable upload
+- Private `private-documents` Storage bucket
+- Org-scoped storage upload policy
+- Typed upload-intent, upload-completion, and signed-download contracts
+- Server-authorized signed upload tokens
+- Short-lived signed download URLs
+- MIME and configurable file-size validation
+- Executable/script extension blocking
+- Immutable document storage paths
+- Revision series, uploader, and timestamp metadata
+- Upload/download/delete access logs and audit events
+- Staff soft-delete + storage cleanup
+- Explicit virus-scanning TODO hook
 
 ## Pending
 
-Phase 5 and later still need:
+Phase 6 and later still need:
 
-- Private document storage and signed URLs
 - Messaging and read tracking
 - Close status UI/workflow
 - QBO billing-reference UI

@@ -22,6 +22,8 @@ export default async function ClientAppLayout({
         <nav className="portal-nav" aria-label="Client portal">
           <Link href="/app/dashboard">Dashboard</Link>
           <Link href="/app/proposals">Proposals</Link>
+          <Link href="/app/requests">Requests</Link>
+          <Link href="/app/documents">Documents</Link>
         </nav>
         <main className="portal-main">{children}</main>
       </div>
