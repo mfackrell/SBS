@@ -214,6 +214,416 @@ window.SBS_CONFIG = SBS_CONFIG;
     });
   }
 
+  function renderTeamMembers() {
+    const data = window.SBS_PROOF_DATA;
+    const grid = doc.querySelector("[data-team-grid]");
+    const note = doc.querySelector("[data-team-note]");
+    if (!data || !grid || !note || !Array.isArray(data.teamMembers)) return;
+
+    const members = data.teamMembers.filter((member) =>
+      member &&
+      member.headshot &&
+      member.name &&
+      member.role &&
+      member.bio &&
+      member.credentials
+    );
+
+    if (!members.length) return;
+
+    members.forEach((member) => {
+      const article = doc.createElement("article");
+      article.className = "card team-card";
+
+      const image = doc.createElement("img");
+      image.src = member.headshot;
+      image.alt = member.name + ", " + member.role;
+      image.width = 640;
+      image.height = 640;
+      image.loading = "lazy";
+
+      const body = doc.createElement("div");
+      body.className = "team-card__body";
+
+      const name = doc.createElement("h2");
+      name.textContent = member.name;
+
+      const role = doc.createElement("p");
+      role.className = "team-card__role";
+      role.textContent = member.role;
+
+      const bio = doc.createElement("p");
+      bio.className = "team-card__bio";
+      bio.textContent = member.bio;
+
+      body.append(name, role, bio);
+
+      const credentials = Array.isArray(member.credentials)
+        ? member.credentials.filter(Boolean)
+        : [member.credentials].filter(Boolean);
+
+      if (credentials.length) {
+        const list = doc.createElement("ul");
+        list.className = "team-card__credentials";
+        credentials.forEach((credential) => {
+          const item = doc.createElement("li");
+          item.textContent = credential;
+          list.appendChild(item);
+        });
+        body.appendChild(list);
+      }
+
+      article.append(image, body);
+      grid.appendChild(article);
+    });
+
+    grid.hidden = false;
+    note.hidden = true;
+  }
+
+  function setupConditionalFields() {
+    const businessOther = doc.querySelector("[data-business-other]");
+    const businessOtherInput = businessOther ? businessOther.querySelector("input") : null;
+    const businessRadios = Array.from(doc.querySelectorAll('input[name="business_type"]'));
+
+    function syncBusinessOther() {
+      if (!businessOther || !businessOtherInput) return;
+      const selected = businessRadios.find((radio) => radio.checked);
+      const show = Boolean(selected && selected.value === "Other");
+      businessOther.hidden = !show;
+      businessOtherInput.required = show;
+      if (!show) businessOtherInput.value = "";
+    }
+
+    businessRadios.forEach((radio) => radio.addEventListener("change", syncBusinessOther));
+    syncBusinessOther();
+
+    const channelOtherToggle = doc.querySelector("[data-channel-other-toggle]");
+    const channelOther = doc.querySelector("[data-channel-other]");
+    const channelOtherInput = channelOther ? channelOther.querySelector("input") : null;
+
+    function syncChannelOther() {
+      if (!channelOtherToggle || !channelOther || !channelOtherInput) return;
+      const show = channelOtherToggle.checked;
+      channelOther.hidden = !show;
+      channelOtherInput.required = show;
+      if (!show) channelOtherInput.value = "";
+    }
+
+    if (channelOtherToggle) channelOtherToggle.addEventListener("change", syncChannelOther);
+    syncChannelOther();
+  }
+
+  function getFormPayload(form) {
+    const formData = new FormData(form);
+    const payload = {};
+
+    for (const [key, value] of formData.entries()) {
+      if (Object.prototype.hasOwnProperty.call(payload, key)) {
+        payload[key] = Array.isArray(payload[key])
+          ? payload[key].concat(value)
+          : [payload[key], value];
+      } else {
+        payload[key] = value;
+      }
+    }
+
+    return payload;
+  }
+
+  function populateAttributionFields(form) {
+    const params = new URLSearchParams(window.location.search);
+    ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].forEach((key) => {
+      const field = form.elements.namedItem(key);
+      if (field) field.value = params.get(key) || "";
+    });
+
+    const landingPage = form.elements.namedItem("landing_page");
+    const referrer = form.elements.namedItem("referrer");
+    const topic = form.elements.namedItem("topic");
+
+    if (landingPage) landingPage.value = window.location.href;
+    if (referrer) referrer.value = doc.referrer || "";
+    if (topic) topic.value = params.get("topic") || "";
+  }
+
+  function setFieldError(field, message) {
+    if (!field) return;
+    field.setAttribute("aria-invalid", message ? "true" : "false");
+
+    const describedBy = field.getAttribute("aria-describedby");
+    if (!describedBy) return;
+
+    const error = doc.getElementById(describedBy);
+    if (error) error.textContent = message || "";
+  }
+
+  function clearFieldError(field) {
+    setFieldError(field, "");
+  }
+
+  function setupInlineValidation(form) {
+    form.addEventListener("invalid", (event) => {
+      const field = event.target;
+      let message = "Please complete this field.";
+
+      if (field.type === "email" && field.validity.typeMismatch) {
+        message = "Enter a valid email address.";
+      } else if (field.type === "url" && field.validity.typeMismatch) {
+        message = "Enter a valid website address.";
+      }
+
+      if (field.name === "business_type") {
+        const error = doc.getElementById("business-type-error");
+        if (error) error.textContent = message;
+      } else {
+        setFieldError(field, message);
+      }
+    }, true);
+
+    form.addEventListener("input", (event) => {
+      if (event.target.matches("input, select, textarea")) clearFieldError(event.target);
+    });
+
+    form.addEventListener("change", (event) => {
+      if (event.target.matches("input, select, textarea")) clearFieldError(event.target);
+      if (event.target.name === "business_type") {
+        const error = doc.getElementById("business-type-error");
+        if (error) error.textContent = "";
+      }
+    });
+  }
+
+  function getRoutingResult(form) {
+    const revenue = form.elements.namedItem("annual_revenue_range").value;
+    const businessTypeField = form.querySelector('input[name="business_type"]:checked');
+    const businessType = businessTypeField ? businessTypeField.value : "";
+    const transactions = form.elements.namedItem("monthly_transactions").value;
+    const entities = form.elements.namedItem("legal_entities").value;
+    const channelCount = form.querySelectorAll('input[name="sales_channels"]:checked').length;
+
+    if (
+      revenue === SBS_CONFIG.routing.notFitRevenue ||
+      businessType === "Other" ||
+      transactions === SBS_CONFIG.routing.notFitTransactions
+    ) {
+      return { outcome: "not_a_fit", tier: "" };
+    }
+
+    if (
+      revenue === SBS_CONFIG.routing.customScopeRevenue ||
+      entities === SBS_CONFIG.routing.customScopeEntities ||
+      transactions === SBS_CONFIG.routing.customScopeTransactions
+    ) {
+      return { outcome: "custom_scope", tier: "" };
+    }
+
+    const transactionCeilings = {
+      "50–100": 100,
+      "100–250": 250,
+      "250–500": 500,
+      "500–1,000": 1000
+    };
+    const transactionCeiling = transactionCeilings[transactions] || Number.POSITIVE_INFINITY;
+
+    let tier = "Platinum";
+    if (transactionCeiling <= 100 && entities === "1" && channelCount <= 1) {
+      tier = "Silver";
+    } else if (transactionCeiling <= 250 && entities === "1" && channelCount <= 2) {
+      tier = "Gold";
+    }
+
+    return { outcome: "in_profile", tier };
+  }
+
+  function renderScheduler(shell, outcome, tier) {
+    if (!shell) return;
+
+    const title = shell.querySelector("[data-scheduler-title]");
+    const message = shell.querySelector("[data-scheduler-message]");
+    const embed = shell.querySelector("[data-scheduler-embed]");
+
+    if (outcome === "custom_scope") {
+      if (title) title.textContent = "Choose a time to talk through a custom scope";
+      if (message) message.textContent = "Your business may need a custom scope. Choose a time and we'll walk through it.";
+    } else {
+      if (title) title.textContent = "Choose a time for your review";
+      if (message) {
+        message.textContent = "Based on what you shared, " + tier + " looks like the likely fit. We confirm your plan and price in writing after your review.";
+      }
+    }
+
+    if (embed) {
+      embed.replaceChildren();
+
+      if (SBS_CONFIG.endpoints.schedulerEmbedUrl) {
+        const frame = doc.createElement("iframe");
+        frame.src = SBS_CONFIG.endpoints.schedulerEmbedUrl;
+        frame.title = "Schedule your Month-End Close Review";
+        frame.width = "960";
+        frame.height = "576";
+        frame.loading = "lazy";
+        embed.appendChild(frame);
+      } else {
+        const fallback = doc.createElement("p");
+        fallback.className = "scheduler-fallback";
+        fallback.textContent = "Thank you. We'll be in touch to schedule your review.";
+        embed.appendChild(fallback);
+      }
+    }
+
+    shell.hidden = false;
+  }
+
+  function setupSchedulerMessageListener() {
+    window.addEventListener("message", (event) => {
+      if (!SBS_CONFIG.endpoints.schedulerEmbedUrl) return;
+
+      let expectedOrigin = "";
+      try {
+        expectedOrigin = new URL(SBS_CONFIG.endpoints.schedulerEmbedUrl).origin;
+      } catch (error) {
+        return;
+      }
+
+      if (event.origin !== expectedOrigin) return;
+
+      /*
+       * Scheduling provider integration stub:
+       * Replace this event-shape check with the selected provider's documented
+       * confirmed-booking event. Do not fire on form submission.
+       */
+      const confirmed = event.data && event.data.type === "booking_confirmed";
+      if (!confirmed) return;
+
+      sessionStorage.setItem("sbs_booking_confirmed", "true");
+      pushEvent("booking_confirmed", {
+        routing_outcome: sessionStorage.getItem("sbs_routing_outcome") || ""
+      });
+      window.location.assign("/thank-you/");
+    });
+  }
+
+  function setupLeadForm() {
+    const form = doc.querySelector("[data-lead-form]");
+    if (!form) return;
+
+    populateAttributionFields(form);
+    setupInlineValidation(form);
+
+    if (SBS_CONFIG.endpoints.leadFormEndpoint) {
+      form.action = SBS_CONFIG.endpoints.leadFormEndpoint;
+    }
+
+    let formStarted = false;
+    const markStarted = () => {
+      if (formStarted) return;
+      formStarted = true;
+      pushEvent("form_start", { location: "book" });
+    };
+
+    form.addEventListener("focusin", markStarted);
+    form.addEventListener("input", markStarted);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const status = form.querySelector("[data-form-status]");
+      const honeypot = form.elements.namedItem("website_confirm");
+
+      if (honeypot && honeypot.value) {
+        if (status) status.textContent = "";
+        return;
+      }
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        const invalid = form.querySelector(":invalid");
+        if (invalid) invalid.focus();
+        return;
+      }
+
+      const result = getRoutingResult(form);
+      form.elements.namedItem("routing_outcome").value = result.outcome;
+      form.elements.namedItem("suggested_tier").value = result.tier;
+
+      sessionStorage.setItem("sbs_routing_outcome", result.outcome);
+      sessionStorage.setItem("sbs_suggested_tier", result.tier);
+      sessionStorage.removeItem("sbs_booking_confirmed");
+      sessionStorage.removeItem("sbs_generate_lead_fired");
+      sessionStorage.removeItem("sbs_qualified_submission_fired");
+
+      pushEvent("form_submit", { routing_outcome: result.outcome });
+
+      const payload = getFormPayload(form);
+
+      if (SBS_CONFIG.endpoints.leadFormEndpoint) {
+        if (status) status.textContent = "Submitting your information.";
+
+        try {
+          const response = await fetch(SBS_CONFIG.endpoints.leadFormEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            keepalive: true
+          });
+
+          if (!response.ok) throw new Error("Submission failed");
+        } catch (error) {
+          if (status) status.textContent = "We couldn't submit your information. Please try again.";
+          return;
+        }
+      }
+
+      if (status) status.textContent = "";
+
+      if (result.outcome === "not_a_fit") {
+        window.location.assign("/not-a-fit/");
+        return;
+      }
+
+      const shell = doc.querySelector("[data-scheduler-shell]");
+      renderScheduler(shell, result.outcome, result.tier);
+      shell?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function setupOutcomePages() {
+    const page = doc.body.dataset.page || "";
+
+    if (page === "not-a-fit") {
+      pushEvent("not_a_fit_submission", {
+        routing_outcome: sessionStorage.getItem("sbs_routing_outcome") || "not_a_fit"
+      });
+      return;
+    }
+
+    if (page !== "thank-you") return;
+
+    const outcome = sessionStorage.getItem("sbs_routing_outcome") || "";
+    const tier = sessionStorage.getItem("sbs_suggested_tier") || "";
+    const qualified = outcome === "in_profile" || outcome === "custom_scope";
+
+    if (!qualified) return;
+
+    if (!sessionStorage.getItem("sbs_generate_lead_fired")) {
+      pushEvent("generate_lead", { routing_outcome: outcome, suggested_tier: tier });
+      sessionStorage.setItem("sbs_generate_lead_fired", "true");
+    }
+
+    if (!sessionStorage.getItem("sbs_qualified_submission_fired")) {
+      pushEvent("qualified_submission", { routing_outcome: outcome, suggested_tier: tier });
+      sessionStorage.setItem("sbs_qualified_submission_fired", "true");
+    }
+
+    if (sessionStorage.getItem("sbs_booking_confirmed") !== "true") {
+      const section = doc.querySelector("[data-thank-you-scheduler-section]");
+      const shell = doc.querySelector("[data-scheduler-shell]");
+      if (section) section.hidden = false;
+      renderScheduler(shell, outcome, tier);
+    }
+  }
+
   function loadAnalytics() {
     const measurementId = SBS_CONFIG.analytics.ga4MeasurementId;
     if (!measurementId) return;
@@ -312,7 +722,12 @@ window.SBS_CONFIG = SBS_CONFIG;
   setupMenu();
   setupTracking();
   setupTierSelector();
+  setupConditionalFields();
+  setupLeadForm();
+  setupSchedulerMessageListener();
+  setupOutcomePages();
   renderProofModules();
+  renderTeamMembers();
   loadAnalytics();
 
   // Google Search Console: install and verify before launch.
