@@ -35,18 +35,24 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <!-- Text wordmark fallback. Replace this one element when a verified logo file is supplied. -->
-      <a class="wordmark" href="/" aria-label="Strategic Business Services home">Strategic Business Services</a>
+      <a class="brand" href="/" aria-label="Strategic Business Services home">
+        <span class="brand-mark" aria-hidden="true">SBS</span>
+        <span class="brand-name">Strategic Business Services</span>
+      </a>
 
       <nav class="desktop-nav" aria-label="Primary navigation">
-        <a href="/">Home</a>
-        <a href="/packages/">Packages &amp; Pricing</a>
-        <a href="/month-end-close/">Month-End Close</a>
-        <a href="/controllership/">Controllership</a>
-        <a href="/ecommerce-accounting/">Ecommerce Accounting</a>
+        <details class="nav-dropdown">
+          <summary>Services</summary>
+          <div class="nav-dropdown__menu">
+            <a href="/month-end-close/"><strong>Month-End Close</strong><span>Documented monthly close and reporting</span></a>
+            <a href="/controllership/"><strong>Controllership</strong><span>Controller oversight and analysis</span></a>
+            <a href="/ecommerce-accounting/"><strong>Ecommerce Accounting</strong><span>Payouts, channels and inventory support</span></a>
+          </div>
+        </details>
+        <a href="/packages/">Packages</a>
         <a href="/how-it-works/">How It Works</a>
-        <a href="/about/">About &amp; Team</a>
-        <a href="/consulting/">Additional Consulting</a>
+        <a href="/about/">About</a>
+        <a href="/consulting/">Consulting</a>
       </nav>
 
       <a class="button button--primary header-cta" href="/book/" data-track="cta_click" data-track-location="header" aria-label="Book a Month-End Close Review">
@@ -63,14 +69,15 @@
 
     <div id="mobile-menu" class="mobile-menu" data-mobile-menu hidden>
       <nav class="container" aria-label="Mobile navigation">
-        <a href="/">Home</a>
-        <a href="/packages/">Packages &amp; Pricing</a>
+        <span class="mobile-menu__label">Services</span>
         <a href="/month-end-close/">Month-End Close</a>
         <a href="/controllership/">Controllership</a>
         <a href="/ecommerce-accounting/">Ecommerce Accounting</a>
+        <span class="mobile-menu__divider" aria-hidden="true"></span>
+        <a href="/packages/">Packages</a>
         <a href="/how-it-works/">How It Works</a>
-        <a href="/about/">About &amp; Team</a>
-        <a href="/consulting/">Additional Consulting</a>
+        <a href="/about/">About</a>
+        <a href="/consulting/">Consulting</a>
       </nav>
     </div>
   </header>
@@ -90,9 +97,33 @@
         <!-- Optional real team-photo content is rendered only from verified proof data. -->
         <div class="team-grid" data-team-grid hidden></div>
 
-        <div class="team-note" data-team-note>
-          <h2>A team built around accountable monthly work</h2>
-          <p>We support established service and ecommerce businesses with bookkeeping, month-end close and controllership. Our work is prepared by experienced professionals in the United States, and we serve clients nationwide, 100% remotely. We have supported businesses since 2008.</p>
+        <div class="about-fallback" data-team-note>
+          <div class="about-proof">
+            <div><strong>2008</strong><span>Serving clients since</span></div>
+            <div><strong>US</strong><span>Team based in the United States</span></div>
+            <div><strong>100%</strong><span>Remote delivery nationwide</span></div>
+          </div>
+
+          <div class="about-structure">
+            <div>
+              <p class="eyebrow">How the team works</p>
+              <h2>Accountability is built into the monthly close.</h2>
+            </div>
+            <div class="about-principles">
+              <article>
+                <span>01</span>
+                <div><h3>Prepared by experienced professionals</h3><p>Your accounting work is handled by a US-based team.</p></div>
+              </article>
+              <article>
+                <span>02</span>
+                <div><h3>Reviewed before delivery</h3><p>The close follows a documented checklist and review step.</p></div>
+              </article>
+              <article>
+                <span>03</span>
+                <div><h3>Built for an ongoing relationship</h3><p>We support established service and ecommerce businesses with bookkeeping, close and controllership.</p></div>
+              </article>
+            </div>
+          </div>
         </div>
       </div>
     </section>
