@@ -1160,3 +1160,270 @@ p {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* Phase 4: team, consulting, intake form and utility pages */
+.team-grid,
+.consulting-grid {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.team-card {
+  overflow: hidden;
+  padding: 0;
+}
+
+.team-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: var(--color-soft);
+}
+
+.team-card__body {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+
+.team-card__role,
+.team-card__bio,
+.team-card__credentials {
+  color: var(--color-muted);
+}
+
+.team-card__credentials {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.team-note {
+  max-width: var(--reading-max);
+  padding: var(--space-8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.team-note h2 {
+  margin-bottom: var(--space-4);
+}
+
+.consulting-card {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.consulting-card h2 {
+  font-size: var(--step-2);
+}
+
+.book-layout {
+  max-width: 54rem;
+}
+
+.page-hero--compact {
+  padding-bottom: var(--space-8);
+}
+
+.lead-form {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.form-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.field label,
+.choice-group legend {
+  font-weight: 700;
+}
+
+.required-text {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.field input[aria-invalid="true"],
+.field select[aria-invalid="true"] {
+  border-width: 0.125rem;
+  border-color: var(--color-navy);
+}
+
+.field-error {
+  min-height: 1.25em;
+  color: var(--color-navy);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.choice-group {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.choice-grid {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.choice-grid label,
+.consent-field label {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: flex-start;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.choice-grid input,
+.consent-field input {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+  margin-top: 0.32rem;
+}
+
+.conditional-field {
+  padding-top: var(--space-2);
+}
+
+.consent-field {
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.form-actions {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+}
+
+.form-status {
+  min-height: 1.5em;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.honeypot {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.scheduler-shell {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-12);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+}
+
+.scheduler-copy {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--reading-max);
+}
+
+.scheduler-copy p {
+  color: var(--color-muted);
+}
+
+.scheduler-embed {
+  min-height: 36rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
+.scheduler-embed iframe {
+  width: 100%;
+  height: 36rem;
+  border: 0;
+}
+
+.scheduler-fallback {
+  max-width: 34rem;
+  padding: var(--space-6);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.noscript-note {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.utility-page {
+  min-height: 50vh;
+}
+
+.utility-page .reading-width {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.utility-page p {
+  color: var(--color-muted);
+}
+
+@media (min-width: 40rem) {
+  .form-grid--two,
+  .consulting-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid__full {
+    grid-column: 1 / -1;
+  }
+
+  .choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 48rem) {
+  .team-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .team-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
