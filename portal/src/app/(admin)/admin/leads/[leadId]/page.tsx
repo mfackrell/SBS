@@ -124,7 +124,7 @@ export default async function LeadPage({ params, searchParams }: LeadPageProps) 
           <article className="admin-panel">
             <div className="panel-heading">
               <h2>Convert to organization</h2>
-              <p>Create the client organization. You can also send the primary contact's portal invitation now.</p>
+              <p>Create the client organization. You can also send the primary contact’s portal invitation now.</p>
             </div>
             <form className="stack-form" action={convertLead}>
               <input type="hidden" name="lead_id" value={lead.id} />

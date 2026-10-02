@@ -10,7 +10,7 @@ import { proposalCanBeAccepted } from "@/lib/proposals/rules";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 async function requireClientProposal(proposalId: string) {
-  const context = await requireClientUser();
+  await requireClientUser();
   const supabase = await createServerSupabaseClient();
   const { data: proposal, error } = await supabase
     .from("proposals")

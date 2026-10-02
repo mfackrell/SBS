@@ -122,7 +122,7 @@ export default async function OrganizationPage({ params, searchParams }: Organiz
         <div className="admin-panel">
           <div className="panel-heading">
             <h2>Access model</h2>
-            <p>Membership is organization-scoped. Clients cannot see another organization's records, and staff-level access is validated again on the server.</p>
+            <p>Membership is organization-scoped. Clients cannot see another organization’s records, and staff-level access is validated again on the server.</p>
           </div>
           <dl className="definition-list">
             <div><dt>Your role</dt><dd>{context.orgRole}</dd></div>

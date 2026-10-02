@@ -58,7 +58,7 @@ export async function updateProfile(formData: FormData) {
   redirect(`${safeReturnPath}?notice=profile-updated`);
 }
 
-export async function signOut(_formData: FormData) {
+export async function signOut() {
   const supabase = await createServerSupabaseClient();
   await supabase.auth.signOut();
   redirect("/login");

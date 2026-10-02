@@ -24,7 +24,7 @@ export async function BillingProfileManager({ orgId }: BillingProfileManagerProp
       <div className="panel-heading">
         <h2 id="billing-profile-title">QuickBooks billing reference</h2>
         <p>
-          Store the QuickBooks Online customer reference and external billing link shown to this organization's client users. The SBS portal does not process billing transactions.
+          Store the QuickBooks Online customer reference and external billing link shown to this organization’s client users. The SBS portal does not process billing transactions.
         </p>
       </div>
 

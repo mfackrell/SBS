@@ -51,20 +51,22 @@ export default async function ClientProposalPage({ params }: ClientProposalPageP
   const orgContext = await requireOrgMember(proposal.org_id);
   if (orgContext.orgRole !== "client") notFound();
 
-  if (proposal.status === "sent") {
-    const { data: viewedStatus, error: viewedError } = await supabase.rpc("mark_portal_proposal_viewed", {
-      p_proposal_id: proposal.id,
-    });
+  const { data: refreshedStatus, error: viewedError } = await supabase.rpc("mark_portal_proposal_viewed", {
+    p_proposal_id: proposal.id,
+  });
+  const effectiveStatus =
+    !viewedError && typeof refreshedStatus === "string"
+      ? refreshedStatus
+      : proposal.status;
 
-    if (!viewedError && viewedStatus === "viewed") {
-      await emitInternalEvent({
-        name: "proposal_viewed",
-        orgId: proposal.org_id,
-        actorUserId: orgContext.user.id,
-        entityType: "proposal",
-        entityId: proposal.id,
-      });
-    }
+  if (!viewedError && proposal.status === "sent" && effectiveStatus === "viewed") {
+    await emitInternalEvent({
+      name: "proposal_viewed",
+      orgId: proposal.org_id,
+      actorUserId: orgContext.user.id,
+      entityType: "proposal",
+      entityId: proposal.id,
+    });
   }
 
   const [{ data: lineItems }, { data: acceptance }] = await Promise.all([
@@ -85,10 +87,8 @@ export default async function ClientProposalPage({ params }: ClientProposalPageP
   const displayTerms = snapshot?.terms_text ?? proposal.terms_text;
   const displayVersion = snapshot?.version ?? proposal.version;
   const displayLines = snapshot?.line_items ?? (lineItems ?? []);
-  const nowExpired =
-    proposal.status === "expired" ||
-    (proposal.expires_at && new Date(proposal.expires_at).getTime() <= Date.now());
-  const actionable = ["sent", "viewed"].includes(proposal.status) && !nowExpired;
+  const nowExpired = effectiveStatus === "expired";
+  const actionable = ["sent", "viewed"].includes(effectiveStatus);
 
   return (
     <>
@@ -96,7 +96,7 @@ export default async function ClientProposalPage({ params }: ClientProposalPageP
         <div>
           <p className="portal-eyebrow">{proposal.organizations?.name ?? "Your organization"} · Proposal</p>
           <h1>{displayTitle}</h1>
-          <p>Version {displayVersion} · <span className="status-chip">{nowExpired ? "expired" : proposal.status}</span></p>
+          <p>Version {displayVersion} · <span className="status-chip">{nowExpired ? "expired" : effectiveStatus}</span></p>
         </div>
         <Link className="text-action" href="/app/proposals">All proposals</Link>
       </div>
@@ -151,7 +151,7 @@ export default async function ClientProposalPage({ params }: ClientProposalPageP
         </section>
       ) : actionable ? (
         <ProposalDecisionForm proposalId={proposal.id} />
-      ) : proposal.status === "declined" ? (
+      ) : effectiveStatus === "declined" ? (
         <section className="admin-panel"><strong>Proposal declined</strong>{proposal.decline_reason ? <p>{proposal.decline_reason}</p> : null}</section>
       ) : (
         <section className="admin-panel"><strong>This proposal is not open for acceptance.</strong></section>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { saveProposalDraft } from "./actions";
@@ -59,7 +59,6 @@ export function ProposalBuilder({ proposal, lineItems }: ProposalBuilderProps) {
     control,
     handleSubmit,
     setError,
-    watch,
     formState: { errors },
   } = useForm<BuilderValues>({
     defaultValues: {
@@ -79,7 +78,7 @@ export function ProposalBuilder({ proposal, lineItems }: ProposalBuilderProps) {
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "lineItems" });
-  const watchedItems = watch("lineItems");
+  const watchedItems = useWatch({ control, name: "lineItems" });
   const estimatedTotal = (watchedItems ?? []).reduce((sum, item) => {
     const quantity = Number(item?.quantity) || 0;
     const price = Number(item?.unitPrice) || 0;
@@ -92,7 +91,7 @@ export function ProposalBuilder({ proposal, lineItems }: ProposalBuilderProps) {
 
     if (!parsed.success) {
       parsed.error.issues.forEach((issue) => {
-        const [first, second, third] = issue.path;
+        const [first] = issue.path;
         if (first === "title" || first === "currency" || first === "expiresOn" || first === "termsText") {
           setError(first, { message: issue.message });
         } else if (first === "lineItems") {

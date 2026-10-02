@@ -1,5 +1,5 @@
 import { readFile, readdir } from "node:fs/promises";
-import { extname, join, relative } from "node:path";
+import { extname, relative } from "node:path";
 
 const root = new URL("../src/", import.meta.url);
 const failures = [];
