@@ -2,7 +2,7 @@
 
 This directory is a standalone Next.js application for the authenticated Strategic Business Services client portal. It is intentionally isolated from the static marketing site in the repository root.
 
-## Architecture through Phase 6
+## Architecture through Phase 7
 
 - Next.js App Router + TypeScript
 - Supabase Auth and Postgres
@@ -25,6 +25,8 @@ This directory is a standalone Next.js application for the authenticated Strateg
 - Organization-scoped message threads with per-user read tracking and unread counts
 - Monthly close periods with client-visible status history and notes
 - Client dashboard summary for open requests, unread messages, latest proposal, and close status
+- QuickBooks Online billing reference/link display only, with staff-managed per-organization configuration
+- Staff operations dashboard with counts and workflow-state panels
 - No payment collection or public registration
 
 The database role `owner` is the admin-equivalent organization role. Application navigation may describe owner-level users as admins while retaining `owner|staff|client` in the database.
@@ -76,7 +78,7 @@ npm run build
 - `SMTP_*`: reserved for a future external email provider. Phase 2 uses Supabase-managed invitation email.
 - `RATE_LIMIT_WINDOW_SECONDS` and `RATE_LIMIT_MAX_REQUESTS`: security configuration used beginning with lead/invite endpoint hardening.
 - `FILE_UPLOAD_MAX_MB` and `ALLOWED_MIME_TYPES`: document-upload limits. Keep `FILE_UPLOAD_MAX_MB` at or below the private bucket's 25 MB hard cap. The application and bucket both restrict uploads to PDF, CSV, XLSX, DOCX, PNG, and JPG/JPEG MIME types.
-- `QBO_BILLING_BASE_URL`: optional reference-link base only. The portal does not process payments.
+- `QBO_BILLING_BASE_URL`: optional reserved billing-link configuration. Phase 7 stores the full client-visible HTTPS QuickBooks URL per organization; the portal does not process payments.
 - `FEATURE_FLAGS`: optional comma-separated feature flags.
 
 ## Supabase Auth configuration
@@ -291,13 +293,43 @@ Creating a period writes `close.created`. Updating its status writes the require
 
 Each summary links directly to the relevant client workflow.
 
+## QuickBooks billing references
+
+Phase 7 keeps billing strictly reference-only.
+
+Staff manages each organization's billing profile from `/admin/organizations/[orgId]`. The profile contains only:
+
+- optional QuickBooks Online customer reference
+- optional HTTPS QuickBooks billing/portal link
+- optional client-visible notes
+
+Updates go through `update_portal_billing_profile()`, which re-checks organization manager access, validates lengths and HTTPS URL format, and writes a `billing.profile_updated` audit event. Direct authenticated mutation of `billing_profiles` is removed; the existing member-scoped SELECT policy remains.
+
+Clients view billing at `/app/billing`. The page displays the stored reference and notes and, when a valid HTTPS URL exists, opens the external QuickBooks billing destination in a separate browser context.
+
+**No billing transaction, payment collection, invoice payment, card entry, bank entry, or checkout occurs inside the SBS portal.**
+
+Shared Zod contracts cover billing-profile update and get/response shapes.
+
+## Admin operations dashboard
+
+`/admin/dashboard` now shows the Phase 7 basic operations panels:
+
+- active/inactive organization counts
+- lead pipeline counts by `new`, `contacted`, `converted`, and `not_fit`
+- proposal counts by all proposal states
+- document-request counts by `open`, `submitted`, and `closed`
+- monthly-close counts by the four close workflow states
+
+The values come from `portal_admin_ops_summary()`, a staff-only security-definer aggregate function. It returns counts only; the dashboard does not expose additional tenant record detail through that summary function.
+
 ## Deployment model
 
 Create a separate Vercel project from this same GitHub repository and set **Root Directory** to `portal`. This prevents the portal build from changing the existing static marketing-site deployment.
 
 A portal hostname can be attached later. Routes remain `/login`, `/accept-invite`, `/app/*`, and `/admin/*` relative to that portal host.
 
-## Implemented through Phase 6
+## Implemented through Phase 7
 
 - Project structure and dependency scaffolding
 - Environment validation and configuration
@@ -362,13 +394,20 @@ A portal hostname can be attached later. Routes remain `/login`, `/accept-invite
 - Client-visible close-status history and notes
 - Required `close.status_changed` audit events
 - Client dashboard summary for open requests, unread messages, proposal status, and close status
+- Typed billing-profile update/get request and response contracts
+- Staff-managed per-organization QBO customer reference, HTTPS billing link, and notes
+- Client `/app/billing` reference-only page
+- Billing-profile audit/internal event hooks
+- Staff-only aggregate operations-summary RPC
+- Admin dashboard counts and pipeline-state panels
 
 ## Pending
 
-Phase 7 and later still need:
+Phase 8 still needs:
 
-- QBO billing-reference UI
-- Broader workflow audit events
-- Rate limiting and spam controls
-- Upload enforcement and storage policies
-- Unit/E2E tests, accessibility hardening and production deployment
+- Accessibility pass
+- Security checklist pass
+- Unit tests and E2E happy paths
+- Development/demo seed script
+- Vercel + Supabase deployment instructions and production deployment
+- Final acceptance checklist

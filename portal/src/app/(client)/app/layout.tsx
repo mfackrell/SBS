@@ -28,6 +28,7 @@ export default async function ClientAppLayout({
           <Link href="/app/documents">Documents</Link>
           <Link href="/app/messages">Messages{unreadMessages > 0 ? <span className="nav-badge">{unreadMessages}</span> : null}</Link>
           <Link href="/app/close-status">Close status</Link>
+          <Link href="/app/billing">Billing</Link>
         </nav>
         <main className="portal-main">{children}</main>
       </div>

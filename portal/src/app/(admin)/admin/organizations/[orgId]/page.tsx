@@ -4,6 +4,7 @@ import { requireOrgManager } from "@/lib/auth/guards";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createInvite, resendInvite, revokeInvite, updateMembership } from "./actions";
 import { ClosePeriodManager } from "./close-period-manager";
+import { BillingProfileManager } from "./billing-profile-manager";
 
 type OrganizationPageProps = {
   params: Promise<{ orgId: string }>;
@@ -20,6 +21,7 @@ const notices: Record<string, string> = {
   "lead-converted-invited": "Lead converted and the primary contact invitation was sent.",
   "close-period-created": "Monthly close period created.",
   "close-period-updated": "Monthly close status updated.",
+  "billing-updated": "QuickBooks billing reference updated.",
 };
 
 const errors: Record<string, string> = {
@@ -39,6 +41,8 @@ const errors: Record<string, string> = {
   "close-period-exists": "A close period already exists for that month.",
   "close-period-create-failed": "The monthly close period could not be created.",
   "close-period-update-failed": "The monthly close status could not be updated.",
+  "billing-invalid": "Check the QuickBooks customer reference, HTTPS billing link, and billing notes.",
+  "billing-update-failed": "The QuickBooks billing reference could not be updated.",
 };
 
 function inviteStatus(invite: {
@@ -189,6 +193,8 @@ export default async function OrganizationPage({ params, searchParams }: Organiz
           <div className="empty-state"><strong>No memberships</strong></div>
         )}
       </section>
+
+      <BillingProfileManager orgId={orgId} />
 
       <ClosePeriodManager orgId={orgId} />
 
