@@ -113,7 +113,8 @@
             </div>
             <div class="field">
               <label for="phone">Phone</label>
-              <input id="phone" name="phone" type="tel" autocomplete="tel">
+              <input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="phone-error">
+              <span class="field-error" id="phone-error" aria-live="polite"></span>
             </div>
             <div class="field">
               <label for="company">Company <span class="required-text">(required)</span></label>
@@ -122,7 +123,8 @@
             </div>
             <div class="field form-grid__full">
               <label for="website">Website</label>
-              <input id="website" name="website" type="url" autocomplete="url" inputmode="url">
+              <input id="website" name="website" type="url" autocomplete="url" inputmode="url" aria-describedby="website-error">
+              <span class="field-error" id="website-error" aria-live="polite"></span>
             </div>
           </div>
 
@@ -191,7 +193,8 @@
             </div>
             <div class="field conditional-field" data-business-other hidden>
               <label for="business_other">Please describe</label>
-              <input id="business_other" name="business_type_other" type="text">
+              <input id="business_other" name="business_type_other" type="text" aria-describedby="business-other-error">
+              <span class="field-error" id="business-other-error" aria-live="polite"></span>
             </div>
             <span class="field-error" id="business-type-error" aria-live="polite"></span>
           </fieldset>
@@ -209,7 +212,8 @@
             </div>
             <div class="field conditional-field" data-channel-other hidden>
               <label for="sales_channels_other">Other channel or processor</label>
-              <input id="sales_channels_other" name="sales_channels_other" type="text">
+              <input id="sales_channels_other" name="sales_channels_other" type="text" aria-describedby="sales-channels-other-error">
+              <span class="field-error" id="sales-channels-other-error" aria-live="polite"></span>
             </div>
           </fieldset>
 
