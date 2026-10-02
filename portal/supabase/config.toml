@@ -26,3 +26,8 @@ site_url = "http://127.0.0.1:3000"
 additional_redirect_urls = ["http://127.0.0.1:3000/accept-invite"]
 jwt_expiry = 3600
 enable_signup = false
+
+
+[auth.email.template.invite]
+subject = "Your Strategic Business Services client portal invitation"
+content_path = "./templates/invite.html"
