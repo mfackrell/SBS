@@ -34,18 +34,24 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <!-- Text wordmark fallback. Replace this one element when a verified logo file is supplied. -->
-      <a class="wordmark" href="/" aria-label="Strategic Business Services home">Strategic Business Services</a>
+      <a class="brand" href="/" aria-label="Strategic Business Services home">
+        <span class="brand-mark" aria-hidden="true">SBS</span>
+        <span class="brand-name">Strategic Business Services</span>
+      </a>
 
       <nav class="desktop-nav" aria-label="Primary navigation">
-        <a href="/">Home</a>
-        <a href="/packages/">Packages &amp; Pricing</a>
-        <a href="/month-end-close/">Month-End Close</a>
-        <a href="/controllership/">Controllership</a>
-        <a href="/ecommerce-accounting/">Ecommerce Accounting</a>
+        <details class="nav-dropdown">
+          <summary>Services</summary>
+          <div class="nav-dropdown__menu">
+            <a href="/month-end-close/"><strong>Month-End Close</strong><span>Documented monthly close and reporting</span></a>
+            <a href="/controllership/"><strong>Controllership</strong><span>Controller oversight and analysis</span></a>
+            <a href="/ecommerce-accounting/"><strong>Ecommerce Accounting</strong><span>Payouts, channels and inventory support</span></a>
+          </div>
+        </details>
+        <a href="/packages/">Packages</a>
         <a href="/how-it-works/">How It Works</a>
-        <a href="/about/">About &amp; Team</a>
-        <a href="/consulting/">Additional Consulting</a>
+        <a href="/about/">About</a>
+        <a href="/consulting/">Consulting</a>
       </nav>
 
       <a class="button button--primary header-cta" href="/book/" data-track="cta_click" data-track-location="header" aria-label="Book a Month-End Close Review">
@@ -62,14 +68,15 @@
 
     <div id="mobile-menu" class="mobile-menu" data-mobile-menu hidden>
       <nav class="container" aria-label="Mobile navigation">
-        <a href="/">Home</a>
-        <a href="/packages/">Packages &amp; Pricing</a>
+        <span class="mobile-menu__label">Services</span>
         <a href="/month-end-close/">Month-End Close</a>
         <a href="/controllership/">Controllership</a>
         <a href="/ecommerce-accounting/">Ecommerce Accounting</a>
+        <span class="mobile-menu__divider" aria-hidden="true"></span>
+        <a href="/packages/">Packages</a>
         <a href="/how-it-works/">How It Works</a>
-        <a href="/about/">About &amp; Team</a>
-        <a href="/consulting/">Additional Consulting</a>
+        <a href="/about/">About</a>
+        <a href="/consulting/">Consulting</a>
       </nav>
     </div>
   </header>
@@ -95,12 +102,23 @@
           to that endpoint before submission.
         -->
         <form class="lead-form" method="post" action="" novalidate data-lead-form>
+          <div class="form-progress" aria-label="Review request sections">
+            <span><b>01</b> About you</span>
+            <span><b>02</b> Your business</span>
+            <span><b>03</b> Your books</span>
+          </div>
+
           <div class="honeypot" aria-hidden="true">
             <label for="website_confirm">Leave this field empty</label>
             <input id="website_confirm" name="website_confirm" type="text" tabindex="-1" autocomplete="off">
           </div>
 
-          <div class="form-grid form-grid--two">
+          <section class="form-section" aria-labelledby="form-about-title">
+            <div class="form-section__heading">
+              <span>01</span>
+              <div><h2 id="form-about-title">About you</h2><p>Who should we contact about the review?</p></div>
+            </div>
+            <div class="form-grid form-grid--two">
             <div class="field">
               <label for="name">Name <span class="required-text">(required)</span></label>
               <input id="name" name="name" type="text" autocomplete="name" required aria-describedby="name-error">
@@ -127,7 +145,13 @@
               <span class="field-error" id="website-error" aria-live="polite"></span>
             </div>
           </div>
+          </section>
 
+          <section class="form-section" aria-labelledby="form-business-title">
+            <div class="form-section__heading">
+              <span>02</span>
+              <div><h2 id="form-business-title">Your business</h2><p>Tell us enough to understand the size and structure of the work.</p></div>
+            </div>
           <div class="form-grid form-grid--two">
             <div class="field">
               <label for="revenue">Annual revenue range <span class="required-text">(required)</span></label>
@@ -216,6 +240,13 @@
               <span class="field-error" id="sales-channels-other-error" aria-live="polite"></span>
             </div>
           </fieldset>
+          </section>
+
+          <section class="form-section" aria-labelledby="form-books-title">
+            <div class="form-section__heading">
+              <span>03</span>
+              <div><h2 id="form-books-title">Your books</h2><p>Tell us where things stand and when you want to begin.</p></div>
+            </div>
 
           <div class="form-grid form-grid--two">
             <div class="field">
@@ -261,6 +292,7 @@
           <input type="hidden" name="topic">
           <input type="hidden" name="routing_outcome">
           <input type="hidden" name="suggested_tier">
+          </section>
 
           <div class="form-actions">
             <button class="button button--primary" type="submit">Submit and continue</button>
