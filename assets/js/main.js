@@ -81,6 +81,11 @@ window.SBS_CONFIG = SBS_CONFIG;
     );
     bindText("hours", SBS_CONFIG.contact.hours);
 
+    const contactConfigured = Boolean(SBS_CONFIG.contact.email || SBS_CONFIG.contact.phone);
+    doc.querySelectorAll("[data-contact-block]").forEach((el) => {
+      el.hidden = !contactConfigured;
+    });
+
     const mobileCall = doc.querySelector("[data-mobile-call]");
     const mobileBook = doc.querySelector("[data-mobile-book]");
     if (mobileCall && mobileBook) {
