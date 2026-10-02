@@ -153,3 +153,39 @@ For a destructive rollback, write and review an explicit compensating migration 
 ## 10. Production promotion
 
 Use a validated preview first when possible. After smoke tests pass, promote that exact artifact to production rather than rebuilding a different artifact.
+
+
+## Provisioned production backend
+
+The production Supabase backend has been created and all portal migrations have been applied.
+
+- Project name: `SBS Portal`
+- Project ref: `ltgpugmzibthflrozmce`
+- Region: `us-east-1`
+- API URL: `https://ltgpugmzibthflrozmce.supabase.co`
+- Public schema tables: provisioned with RLS enabled
+- Storage: private document bucket provisioned
+- Production ACL hardening migrations: applied
+- Latest verified application CI: lint, typecheck, unit tests, security checks, and production build passing
+
+Do not commit the Supabase service-role/secret key or application security salts to Git.
+
+### Remaining Vercel provisioning
+
+Create a separate Vercel project for this repository with:
+
+- Repository: `mfackrell/SBS`
+- Project name: recommended `sbs-portal`
+- Root Directory: `portal`
+- Framework: Next.js
+
+Do **not** repoint the existing `contract-cfo` project; that project serves the public marketing site.
+
+After the portal project is created, configure the environment variables from `.env.example`, set `NEXT_PUBLIC_APP_URL` to the portal production URL, then add that production URL to the Supabase Auth site/redirect configuration.
+
+Finally configure the existing marketing-site Vercel project with:
+
+- `PORTAL_LEAD_INTAKE_URL=https://<portal-host>/api/lead-intake`
+- `LEAD_INGEST_SHARED_SECRET=<same value configured on the portal>`
+
+Then enable `SBS_CONFIG.endpoints.leadFormEndpoint = "/api/lead-intake"` in the marketing site's `assets/js/main.js`.
