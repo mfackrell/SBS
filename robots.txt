@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://contract-cfo.com/sitemap.xml
