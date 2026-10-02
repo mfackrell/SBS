@@ -10,6 +10,7 @@ export default async function AdminAppLayout({
 
   return (
     <div className="portal-shell">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <header className="portal-header">
         <div className="portal-header__inner">
           <Link className="portal-brand" href="/admin/dashboard">
@@ -28,8 +29,9 @@ export default async function AdminAppLayout({
           <Link href="/admin/proposals">Proposals</Link>
           <Link href="/admin/requests">Requests</Link>
           <Link href="/admin/messages">Messages{unreadMessages > 0 ? <span className="nav-badge">{unreadMessages}</span> : null}</Link>
+          <Link href="/admin/settings">Settings</Link>
         </nav>
-        <main className="portal-main">{children}</main>
+        <main className="portal-main" id="main-content" tabIndex={-1}>{children}</main>
       </div>
     </div>
   );

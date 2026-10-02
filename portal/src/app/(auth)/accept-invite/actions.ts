@@ -5,6 +5,8 @@ import { z } from "zod";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isStaffRole } from "@/lib/auth/roles";
+import { consumePortalRateLimit } from "@/lib/security/rate-limit";
+import { logSecurityFailure } from "@/lib/security/events";
 
 const acceptanceSchema = z.object({
   fullName: z.string().trim().min(2).max(120),
@@ -24,10 +26,18 @@ export async function finalizeInvite(input: { fullName: string }) {
     return { error: "Your invitation session is missing or expired. Open the newest invitation email and try again." };
   }
 
+  const allowed = await consumePortalRateLimit("invite_accept", authData.user.id, { maxAttempts: 10 });
+
+  if (!allowed) {
+    logSecurityFailure("invite_accept_rate_limited");
+    return { error: "Too many invitation attempts. Try again after a short delay." };
+  }
+
   const inviteId = authData.user.user_metadata?.portal_invite_id;
   const inviteToken = authData.user.user_metadata?.portal_invite_token;
 
   if (typeof inviteId !== "string" || typeof inviteToken !== "string") {
+    logSecurityFailure("invite_accept_failed", { reason: "missing_portal_metadata" });
     return { error: "This invitation is missing its portal authorization details. Ask Strategic Business Services to resend it." };
   }
 
@@ -38,6 +48,7 @@ export async function finalizeInvite(input: { fullName: string }) {
   });
 
   if (error) {
+    logSecurityFailure("invite_accept_failed", { reason: error.message.slice(0, 120) });
     const message = error.message.toLowerCase();
 
     if (message.includes("expired")) {

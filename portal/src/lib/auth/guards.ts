@@ -3,7 +3,12 @@ import "server-only";
 import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { isOrgRole, isStaffRole, type OrgRole } from "./roles";
+import { isOrgRole, type OrgRole } from "./roles";
+import {
+  activeMembershipForOrg,
+  hasClientAccess,
+  hasStaffAccess,
+} from "./permissions";
 
 type Membership = {
   org_id: string;
@@ -64,7 +69,7 @@ export async function requireAuthenticatedUser() {
 export async function requireStaffUser() {
   const context = await requireAuthenticatedUser();
 
-  if (!context.memberships.some((membership) => isStaffRole(membership.role))) {
+  if (!hasStaffAccess(context.memberships)) {
     redirect("/app/dashboard");
   }
 
@@ -74,7 +79,7 @@ export async function requireStaffUser() {
 export async function requireClientUser() {
   const context = await requireAuthenticatedUser();
 
-  if (!context.memberships.some((membership) => membership.role === "client")) {
+  if (!hasClientAccess(context.memberships)) {
     redirect("/admin/dashboard");
   }
 
@@ -83,7 +88,7 @@ export async function requireClientUser() {
 
 export async function requireOrgMember(orgId: string) {
   const context = await requireAuthenticatedUser();
-  const membership = context.memberships.find((item) => item.org_id === orgId);
+  const membership = activeMembershipForOrg(context.memberships, orgId);
 
   if (!membership) {
     redirect("/login?error=not-authorized");
@@ -98,7 +103,7 @@ export async function requireOrgMember(orgId: string) {
 export async function requireOrgManager(orgId: string) {
   const context = await requireOrgMember(orgId);
 
-  if (!isStaffRole(context.orgRole)) {
+  if (context.orgRole !== "owner" && context.orgRole !== "staff") {
     redirect("/app/dashboard");
   }
 

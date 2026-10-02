@@ -1,0 +1,57 @@
+name: Portal CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "portal/**"
+      - ".github/workflows/portal-ci.yml"
+  pull_request:
+    paths:
+      - "portal/**"
+      - ".github/workflows/portal-ci.yml"
+
+jobs:
+  unit-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: portal
+    env:
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-key
+      INVITE_EXPIRES_MINUTES: "60"
+      LEAD_INGEST_SHARED_SECRET: ci-lead-secret-012345678901234567890123456789
+      LEAD_RATE_LIMIT_SALT: ci-lead-salt-0123456789012345678901234567890
+      SECURITY_RATE_LIMIT_SALT: ci-security-salt-0123456789012345678901234567
+      RATE_LIMIT_WINDOW_SECONDS: "60"
+      RATE_LIMIT_MAX_REQUESTS: "20"
+      FILE_UPLOAD_MAX_MB: "25"
+      ALLOWED_MIME_TYPES: application/pdf,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg
+      QBO_BILLING_BASE_URL: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Security source checks
+        run: npm run security:check
+
+      - name: Production build
+        run: npm run build

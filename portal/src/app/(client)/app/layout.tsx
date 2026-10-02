@@ -10,6 +10,7 @@ export default async function ClientAppLayout({
 
   return (
     <div className="portal-shell">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <header className="portal-header">
         <div className="portal-header__inner">
           <Link className="portal-brand" href="/app/dashboard">
@@ -29,8 +30,9 @@ export default async function ClientAppLayout({
           <Link href="/app/messages">Messages{unreadMessages > 0 ? <span className="nav-badge">{unreadMessages}</span> : null}</Link>
           <Link href="/app/close-status">Close status</Link>
           <Link href="/app/billing">Billing</Link>
+          <Link href="/app/settings">Settings</Link>
         </nav>
-        <main className="portal-main">{children}</main>
+        <main className="portal-main" id="main-content" tabIndex={-1}>{children}</main>
       </div>
     </div>
   );

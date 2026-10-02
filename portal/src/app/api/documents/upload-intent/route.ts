@@ -2,11 +2,21 @@ import { NextResponse } from "next/server";
 import { documentUploadIntentSchema } from "@/lib/contracts/documents";
 import { getServerEnv } from "@/lib/env/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { isSameOriginRequest } from "@/lib/security/csrf";
+import { logSecurityFailure } from "@/lib/security/events";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    logSecurityFailure("document_upload_intent_csrf_rejected");
+    return NextResponse.json(
+      { ok: false, intentId: null, documentId: null, path: null, token: null, error: "Request origin was not accepted." },
+      { status: 403 },
+    );
+  }
+
   const supabase = await createServerSupabaseClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
 

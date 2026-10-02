@@ -30,6 +30,7 @@ const errors: Record<string, string> = {
   "invite-member": "That email already belongs to an active member of this organization.",
   "invite-failed": "The invitation could not be created.",
   "invite-delivery": "The invitation record was created but email delivery failed. It has been revoked.",
+  "invite-rate-limit": "Too many invitation actions. Try again after a short delay.",
   "resend-failed": "The invitation could not be prepared for resend.",
   "resend-delivery": "The invitation email could not be resent.",
   "revoke-failed": "The invitation could not be revoked.",

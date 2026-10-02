@@ -5,6 +5,7 @@ import {
   type LeadIntakeResponse,
 } from "@/lib/contracts/lead-intake";
 import { getServerEnv } from "@/lib/env/server";
+import { determineLeadRouting } from "@/lib/leads/routing";
 import {
   leadDedupeHash,
   leadFingerprint,
@@ -81,7 +82,23 @@ export async function POST(request: NextRequest) {
     return response({ ok: false, lead_id: null }, 429);
   }
 
-  const payload = normalizeLeadForPersistence(parsed.data, body);
+  const serverRouting = determineLeadRouting({
+    annualRevenueRange: parsed.data.annual_revenue_range,
+    businessType: parsed.data.business_type,
+    monthlyTransactions: parsed.data.monthly_transactions,
+    legalEntities:
+      parsed.data.legal_entities === 3 ? "3 or more" : String(parsed.data.legal_entities),
+    salesChannelCount: parsed.data.sales_channels.length,
+  });
+
+  const payload = normalizeLeadForPersistence(
+    {
+      ...parsed.data,
+      routing_outcome: serverRouting.outcome,
+      suggested_tier: serverRouting.tier,
+    },
+    body,
+  );
   const dedupeHash = leadDedupeHash({
     name: payload.name,
     email: payload.email,

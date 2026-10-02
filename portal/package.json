@@ -11,7 +11,10 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:unit": "vitest run tests/unit",
+    "seed:dev": "node scripts/seed-dev.mjs",
+    "security:check": "node scripts/security-check.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

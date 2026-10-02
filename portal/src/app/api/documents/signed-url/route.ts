@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { signedDocumentUrlRequestSchema } from "@/lib/contracts/documents";
 import { emitInternalEvent } from "@/lib/events/internal";
+import { isSameOriginRequest } from "@/lib/security/csrf";
+import { logSecurityFailure } from "@/lib/security/events";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const SIGNED_URL_SECONDS = 60;
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    logSecurityFailure("document_signed_url_csrf_rejected");
+    return NextResponse.json({ ok: false, url: null, expiresIn: null, error: "Request origin was not accepted." }, { status: 403 });
+  }
+
   const supabase = await createServerSupabaseClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
 

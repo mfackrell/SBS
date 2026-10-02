@@ -10,6 +10,8 @@ import { getServerEnv } from "@/lib/env/server";
 import { createInviteToken } from "@/lib/invites/token";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { consumePortalRateLimit } from "@/lib/security/rate-limit";
+import { logSecurityFailure } from "@/lib/security/events";
 
 const uuidSchema = z.string().uuid();
 
@@ -44,6 +46,17 @@ export async function createInvite(formData: FormData) {
 
   const context = await requireOrgManager(parsed.data.orgId);
 
+  const inviteAllowed = await consumePortalRateLimit(
+    "invite_create",
+    `${context.user.id}:${parsed.data.orgId}`,
+    { maxAttempts: 10 },
+  );
+
+  if (!inviteAllowed) {
+    logSecurityFailure("invite_create_rate_limited", { org_id: parsed.data.orgId });
+    redirect(`/admin/organizations/${parsed.data.orgId}?error=invite-rate-limit`);
+  }
+
   if (context.orgRole === "staff" && parsed.data.role !== "client") {
     redirect(`/admin/organizations/${parsed.data.orgId}?error=invite-role`);
   }
@@ -67,6 +80,10 @@ export async function createInvite(formData: FormData) {
       : message.includes("user_already_member")
         ? "invite-member"
         : "invite-failed";
+    logSecurityFailure("invite_create_failed", {
+      org_id: parsed.data.orgId,
+      reason: message.slice(0, 120),
+    });
     redirect(`/admin/organizations/${parsed.data.orgId}?error=${code}`);
   }
 
@@ -108,6 +125,17 @@ export async function resendInvite(formData: FormData) {
   }
 
   const context = await requireOrgManager(orgId.data);
+  const resendAllowed = await consumePortalRateLimit(
+    "invite_resend",
+    `${context.user.id}:${orgId.data}`,
+    { maxAttempts: 10 },
+  );
+
+  if (!resendAllowed) {
+    logSecurityFailure("invite_resend_rate_limited", { org_id: orgId.data });
+    redirect(`/admin/organizations/${orgId.data}?error=invite-rate-limit`);
+  }
+
   const { token, tokenHash } = createInviteToken();
   const expiresAt = inviteExpirationIso();
   const supabase = await createServerSupabaseClient();

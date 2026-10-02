@@ -6,6 +6,7 @@ import { proposalAcceptSchema, proposalDeclineSchema } from "@/lib/contracts/pro
 import { emitInternalEvent } from "@/lib/events/internal";
 import { requireClientUser, requireOrgMember } from "@/lib/auth/guards";
 import { requestIp, requestUserAgent } from "@/lib/security/request-context";
+import { proposalCanBeAccepted } from "@/lib/proposals/rules";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 async function requireClientProposal(proposalId: string) {
@@ -13,7 +14,7 @@ async function requireClientProposal(proposalId: string) {
   const supabase = await createServerSupabaseClient();
   const { data: proposal, error } = await supabase
     .from("proposals")
-    .select("id,org_id,status")
+    .select("id,org_id,status,expires_at")
     .eq("id", proposalId)
     .maybeSingle();
 
@@ -42,6 +43,13 @@ export async function acceptProposal(input: {
   const proposalContext = await requireClientProposal(parsed.data.proposalId);
   if ("error" in proposalContext) {
     return { ok: false as const, error: proposalContext.error };
+  }
+
+  if (!proposalCanBeAccepted({
+    status: proposalContext.proposal.status,
+    expiresAt: proposalContext.proposal.expires_at,
+  })) {
+    return { ok: false as const, error: "This proposal is not currently open for acceptance." };
   }
 
   const requestHeaders = await headers();

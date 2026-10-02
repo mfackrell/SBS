@@ -9,6 +9,7 @@ const errors: Record<string, string> = {
   "invalid-input": "Enter a valid email address and password.",
   "invalid-credentials": "We could not sign you in with those credentials.",
   "not-authorized": "Your account is not active for this portal.",
+  "rate-limited": "Too many sign-in attempts. Try again after a short delay.",
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {

@@ -2,7 +2,7 @@
 
 This directory is a standalone Next.js application for the authenticated Strategic Business Services client portal. It is intentionally isolated from the static marketing site in the repository root.
 
-## Architecture through Phase 7
+## Architecture through Phase 8
 
 - Next.js App Router + TypeScript
 - Supabase Auth and Postgres
@@ -27,6 +27,7 @@ This directory is a standalone Next.js application for the authenticated Strateg
 - Client dashboard summary for open requests, unread messages, latest proposal, and close status
 - QuickBooks Online billing reference/link display only, with staff-managed per-organization configuration
 - Staff operations dashboard with counts and workflow-state panels
+- Phase 8 security hardening, settings routes, automated source checks, unit tests, Playwright critical-flow coverage, and dev seed tooling
 - No payment collection or public registration
 
 The database role `owner` is the admin-equivalent organization role. Application navigation may describe owner-level users as admins while retaining `owner|staff|client` in the database.
@@ -74,7 +75,8 @@ npm run build
 - `SUPABASE_JWT_SECRET`: optional; leave unset unless a later server integration needs direct JWT verification.
 - `INVITE_EXPIRES_MINUTES`: application invite lifetime. Keep it aligned with Supabase Auth Email OTP Expiration. The default is 60 minutes.
 - `LEAD_INGEST_SHARED_SECRET`: random server-only secret shared only by the marketing proxy and portal ingestion endpoint. Use at least 32 characters.
-- `LEAD_RATE_LIMIT_SALT`: separate random server-only value used to HMAC client IP/user-agent fingerprints before rate-limit storage.
+- `LEAD_RATE_LIMIT_SALT`: random server-only value used to HMAC lead-intake client fingerprints before rate-limit storage.
+- `SECURITY_RATE_LIMIT_SALT`: optional separate 32+ character salt for login/invite throttling; when unset, the portal reuses `LEAD_RATE_LIMIT_SALT`.
 - `SMTP_*`: reserved for a future external email provider. Phase 2 uses Supabase-managed invitation email.
 - `RATE_LIMIT_WINDOW_SECONDS` and `RATE_LIMIT_MAX_REQUESTS`: security configuration used beginning with lead/invite endpoint hardening.
 - `FILE_UPLOAD_MAX_MB` and `ALLOWED_MIME_TYPES`: document-upload limits. Keep `FILE_UPLOAD_MAX_MB` at or below the private bucket's 25 MB hard cap. The application and bucket both restrict uploads to PDF, CSV, XLSX, DOCX, PNG, and JPG/JPEG MIME types.
@@ -323,13 +325,54 @@ Shared Zod contracts cover billing-profile update and get/response shapes.
 
 The values come from `portal_admin_ops_summary()`, a staff-only security-definer aggregate function. It returns counts only; the dashboard does not expose additional tenant record detail through that summary function.
 
+## Phase 8 hardening and tests
+
+Phase 8 completes the requested baseline hardening:
+
+- login, invite create/resend, and invite acceptance use database-backed rate limiting;
+- cookie-authenticated document POST APIs reject cross-origin requests;
+- Next.js response headers block framing and MIME sniffing, restrict browser permissions, set same-origin referrer behavior, and constrain framing/base/form origins;
+- server-side lead intake recomputes routing outcome and suggested tier instead of trusting the browser-provided result;
+- permission helpers used by route guards are separated into pure functions and covered by unit tests;
+- proposal acceptance has a pure preflight business-rule helper while the database function remains authoritative;
+- `/app/settings` and `/admin/settings` provide the target settings routes with profile update and sign-out;
+- portal shells provide keyboard skip navigation and reduced-motion handling.
+
+Automated checks:
+
+```bash
+npm run lint
+npm run typecheck
+npm run test:unit
+npm run security:check
+npm run build
+```
+
+The Playwright suite under `tests/e2e` contains all seven critical flows required by the brief plus an accessibility baseline. It requires a running portal and seeded Supabase environment.
+
+For local/demo setup:
+
+```bash
+supabase start
+supabase db reset
+npm run seed:dev
+E2E_BASE_URL=http://127.0.0.1:3000 npm run test:e2e
+```
+
+See:
+
+- `SECURITY_CHECKLIST.md`
+- `DEPLOYMENT.md`
+- `ACCEPTANCE.md`
+- `OWNER_DECISIONS.md`
+
 ## Deployment model
 
 Create a separate Vercel project from this same GitHub repository and set **Root Directory** to `portal`. This prevents the portal build from changing the existing static marketing-site deployment.
 
 A portal hostname can be attached later. Routes remain `/login`, `/accept-invite`, `/app/*`, and `/admin/*` relative to that portal host.
 
-## Implemented through Phase 7
+## Implemented through Phase 8
 
 - Project structure and dependency scaffolding
 - Environment validation and configuration
@@ -400,14 +443,20 @@ A portal hostname can be attached later. Routes remain `/login`, `/accept-invite
 - Billing-profile audit/internal event hooks
 - Staff-only aggregate operations-summary RPC
 - Admin dashboard counts and pipeline-state panels
+- Client and admin settings routes
+- Profile update and sign-out workflow
+- Login/invite/acceptance database-backed rate limiting
+- Same-origin protection on cookie-authenticated document APIs
+- Security response headers
+- Server-derived lead routing
+- Unit tests for validation, permission helpers, proposal acceptance rules, and lead routing/role helpers
+- Playwright specs for all seven critical flows
+- Accessibility Playwright baseline and keyboard skip navigation
+- Idempotent local/demo seed script with test users
+- GitHub Actions lint/typecheck/unit/security/build workflow
+- Supabase local config
+- Security checklist, deployment runbook, final acceptance checklist, and owner-decision checklist
 
-## Pending
+## Production status
 
-Phase 8 still needs:
-
-- Accessibility pass
-- Security checklist pass
-- Unit tests and E2E happy paths
-- Development/demo seed script
-- Vercel + Supabase deployment instructions and production deployment
-- Final acceptance checklist
+Application implementation is complete through Phase 8. Production acceptance still requires the runtime items marked unchecked in `ACCEPTANCE.md`, including a configured Supabase project, executed Playwright suite, and a dedicated Vercel portal deployment.
