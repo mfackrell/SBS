@@ -1,0 +1,22 @@
+# Strategic Business Services redirects
+# This format is for Netlify and compatible hosts such as Cloudflare Pages.
+
+# Legacy domain: preserve the requested path on the new domain.
+https://tfgboise.com/* https://contract-cfo.com/:splat 301!
+https://www.tfgboise.com/* https://contract-cfo.com/:splat 301!
+
+# CONFIRM against the real old URL list before launch.
+# Remove or revise any rule that does not match an actual historical URL.
+/bookkeeping /month-end-close/ 301
+/bookkeeping/ /month-end-close/ 301
+/controllership /controllership/ 301
+/e-commerce /ecommerce-accounting/ 301
+/e-commerce/ /ecommerce-accounting/ 301
+/ecommerce /ecommerce-accounting/ 301
+/ecommerce/ /ecommerce-accounting/ 301
+/fractional-cfo /consulting/ 301
+/fractional-cfo/ /consulting/ 301
+/international /consulting/ 301
+/international/ /consulting/ 301
+
+# Email forwarding for the legacy domain is configured at the email host, not in this site.
