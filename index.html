@@ -60,18 +60,24 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <!-- Text wordmark fallback. Replace this one element when a verified logo file is supplied. -->
-      <a class="wordmark" href="/" aria-label="Strategic Business Services home">Strategic Business Services</a>
+      <a class="brand" href="/" aria-label="Strategic Business Services home">
+        <span class="brand-mark" aria-hidden="true">SBS</span>
+        <span class="brand-name">Strategic Business Services</span>
+      </a>
 
       <nav class="desktop-nav" aria-label="Primary navigation">
-        <a href="/">Home</a>
-        <a href="/packages/">Packages &amp; Pricing</a>
-        <a href="/month-end-close/">Month-End Close</a>
-        <a href="/controllership/">Controllership</a>
-        <a href="/ecommerce-accounting/">Ecommerce Accounting</a>
+        <details class="nav-dropdown">
+          <summary>Services</summary>
+          <div class="nav-dropdown__menu">
+            <a href="/month-end-close/"><strong>Month-End Close</strong><span>Documented monthly close and reporting</span></a>
+            <a href="/controllership/"><strong>Controllership</strong><span>Controller oversight and analysis</span></a>
+            <a href="/ecommerce-accounting/"><strong>Ecommerce Accounting</strong><span>Payouts, channels and inventory support</span></a>
+          </div>
+        </details>
+        <a href="/packages/">Packages</a>
         <a href="/how-it-works/">How It Works</a>
-        <a href="/about/">About &amp; Team</a>
-        <a href="/consulting/">Additional Consulting</a>
+        <a href="/about/">About</a>
+        <a href="/consulting/">Consulting</a>
       </nav>
 
       <a class="button button--primary header-cta" href="/book/" data-track="cta_click" data-track-location="header" aria-label="Book a Month-End Close Review">
@@ -88,14 +94,15 @@
 
     <div id="mobile-menu" class="mobile-menu" data-mobile-menu hidden>
       <nav class="container" aria-label="Mobile navigation">
-        <a href="/">Home</a>
-        <a href="/packages/">Packages &amp; Pricing</a>
+        <span class="mobile-menu__label">Services</span>
         <a href="/month-end-close/">Month-End Close</a>
         <a href="/controllership/">Controllership</a>
         <a href="/ecommerce-accounting/">Ecommerce Accounting</a>
+        <span class="mobile-menu__divider" aria-hidden="true"></span>
+        <a href="/packages/">Packages</a>
         <a href="/how-it-works/">How It Works</a>
-        <a href="/about/">About &amp; Team</a>
-        <a href="/consulting/">Additional Consulting</a>
+        <a href="/about/">About</a>
+        <a href="/consulting/">Consulting</a>
       </nav>
     </div>
   </header>
@@ -104,6 +111,7 @@
     <section class="hero">
       <div class="container hero-grid">
         <div class="hero-copy">
+          <p class="eyebrow">Bookkeeping · month-end close · controllership</p>
           <h1>US-based bookkeeping and month-end close for growing service and ecommerce businesses</h1>
           <p class="lede">Accurate books, a documented monthly close, and clear financial reports, prepared by experienced accountants in the United States. 100% remote. Serving clients since 2008.</p>
           <div class="button-row">
@@ -112,6 +120,31 @@
           </div>
           <p class="hero-offer" data-bind="entryOffer" hidden></p>
         </div>
+
+        <aside class="close-preview" aria-label="Example monthly close deliverables">
+          <div class="close-preview__top">
+            <span class="close-preview__kicker">Monthly close</span>
+            <span class="close-preview__status">Reviewed</span>
+          </div>
+          <div class="close-preview__report">
+            <div>
+              <span>Financial statements</span>
+              <strong>P&amp;L · Balance sheet · Cash flow</strong>
+            </div>
+            <svg viewBox="0 0 120 44" role="img" aria-label="Illustrative financial trend">
+              <path d="M2 38 L24 29 L44 33 L65 18 L84 23 L104 9 L118 13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="close-preview__checklist" aria-label="Close workflow">
+            <div><span aria-hidden="true">✓</span><span>Accounts reconciled</span></div>
+            <div><span aria-hidden="true">✓</span><span>Close checklist completed</span></div>
+            <div><span aria-hidden="true">✓</span><span>Review step completed</span></div>
+            <div><span aria-hidden="true">✓</span><span>Reporting delivered</span></div>
+          </div>
+          <div class="close-preview__footer">
+            <span>Then we talk through what the numbers mean.</span>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -170,6 +203,38 @@
               <h3>We close every month.</h3>
               <p>You get reviewed financial statements and a conversation about what they mean.</p>
             </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--navy monthly-output">
+      <div class="container monthly-output__grid">
+        <div class="monthly-output__intro">
+          <p class="eyebrow eyebrow--light">What arrives every month</p>
+          <h2>Not just reconciled books. A close you can use.</h2>
+          <p>Your close follows a documented process, includes reviewed financial statements, and ends with clear reporting you can use to run the business.</p>
+        </div>
+        <div class="monthly-output__items">
+          <article>
+            <span class="monthly-output__number">01</span>
+            <h3>Reconciled accounts</h3>
+            <p>Bank, card and payment-processor activity tied out.</p>
+          </article>
+          <article>
+            <span class="monthly-output__number">02</span>
+            <h3>Documented close</h3>
+            <p>A repeatable checklist and review step before delivery.</p>
+          </article>
+          <article>
+            <span class="monthly-output__number">03</span>
+            <h3>Financial statements</h3>
+            <p>P&amp;L, balance sheet and cash flow reporting.</p>
+          </article>
+          <article>
+            <span class="monthly-output__number">04</span>
+            <h3>Review conversation</h3>
+            <p>A conversation about what the numbers mean for your business.</p>
           </article>
         </div>
       </div>
