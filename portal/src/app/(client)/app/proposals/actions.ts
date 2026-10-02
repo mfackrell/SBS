@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { proposalAcceptSchema, proposalDeclineSchema } from "@/lib/contracts/proposals";
+import { emitInternalEvent } from "@/lib/events/internal";
 import { requireClientUser, requireOrgMember } from "@/lib/auth/guards";
 import { requestIp, requestUserAgent } from "@/lib/security/request-context";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -25,7 +26,7 @@ async function requireClientProposal(proposalId: string) {
     return { error: "Client membership is required." as const };
   }
 
-  return { context, supabase, proposal };
+  return { context: orgContext, supabase, proposal };
 }
 
 export async function acceptProposal(input: {
@@ -63,6 +64,15 @@ export async function acceptProposal(input: {
     return { ok: false as const, error: publicMessage };
   }
 
+  await emitInternalEvent({
+    name: "proposal_accepted",
+    orgId: proposalContext.proposal.org_id,
+    actorUserId: proposalContext.context.user.id,
+    entityType: "proposal",
+    entityId: parsed.data.proposalId,
+    metadata: { acceptance_id: data },
+  });
+
   revalidatePath("/app/proposals");
   revalidatePath(`/app/proposals/${parsed.data.proposalId}`);
   return { ok: true as const };
@@ -96,6 +106,14 @@ export async function declineProposal(input: {
         : "The proposal could not be declined.",
     };
   }
+
+  await emitInternalEvent({
+    name: "proposal_declined",
+    orgId: proposalContext.proposal.org_id,
+    actorUserId: proposalContext.context.user.id,
+    entityType: "proposal",
+    entityId: parsed.data.proposalId,
+  });
 
   revalidatePath("/app/proposals");
   revalidatePath(`/app/proposals/${parsed.data.proposalId}`);

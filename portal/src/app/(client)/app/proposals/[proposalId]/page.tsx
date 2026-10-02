@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireClientUser, requireOrgMember } from "@/lib/auth/guards";
+import { emitInternalEvent } from "@/lib/events/internal";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ProposalDecisionForm } from "../proposal-decision-form";
 
@@ -51,9 +52,19 @@ export default async function ClientProposalPage({ params }: ClientProposalPageP
   if (orgContext.orgRole !== "client") notFound();
 
   if (proposal.status === "sent") {
-    await supabase.rpc("mark_portal_proposal_viewed", {
+    const { data: viewedStatus, error: viewedError } = await supabase.rpc("mark_portal_proposal_viewed", {
       p_proposal_id: proposal.id,
     });
+
+    if (!viewedError && viewedStatus === "viewed") {
+      await emitInternalEvent({
+        name: "proposal_viewed",
+        orgId: proposal.org_id,
+        actorUserId: orgContext.user.id,
+        entityType: "proposal",
+        entityId: proposal.id,
+      });
+    }
   }
 
   const [{ data: lineItems }, { data: acceptance }] = await Promise.all([
