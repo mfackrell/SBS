@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { requireStaffUser } from "@/lib/auth/guards";
+import { getUnreadMessageCount } from "@/lib/messages/queries";
 
 export default async function AdminAppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const context = await requireStaffUser();
+  const unreadMessages = await getUnreadMessageCount();
 
   return (
     <div className="portal-shell">
@@ -25,6 +27,7 @@ export default async function AdminAppLayout({
           <Link href="/admin/organizations">Organizations</Link>
           <Link href="/admin/proposals">Proposals</Link>
           <Link href="/admin/requests">Requests</Link>
+          <Link href="/admin/messages">Messages{unreadMessages > 0 ? <span className="nav-badge">{unreadMessages}</span> : null}</Link>
         </nav>
         <main className="portal-main">{children}</main>
       </div>

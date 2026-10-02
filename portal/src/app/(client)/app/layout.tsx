@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { requireClientUser } from "@/lib/auth/guards";
+import { getUnreadMessageCount } from "@/lib/messages/queries";
 
 export default async function ClientAppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const context = await requireClientUser();
+  const unreadMessages = await getUnreadMessageCount();
 
   return (
     <div className="portal-shell">
@@ -24,6 +26,8 @@ export default async function ClientAppLayout({
           <Link href="/app/proposals">Proposals</Link>
           <Link href="/app/requests">Requests</Link>
           <Link href="/app/documents">Documents</Link>
+          <Link href="/app/messages">Messages{unreadMessages > 0 ? <span className="nav-badge">{unreadMessages}</span> : null}</Link>
+          <Link href="/app/close-status">Close status</Link>
         </nav>
         <main className="portal-main">{children}</main>
       </div>

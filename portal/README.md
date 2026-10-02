@@ -2,7 +2,7 @@
 
 This directory is a standalone Next.js application for the authenticated Strategic Business Services client portal. It is intentionally isolated from the static marketing site in the repository root.
 
-## Architecture through Phase 5
+## Architecture through Phase 6
 
 - Next.js App Router + TypeScript
 - Supabase Auth and Postgres
@@ -22,6 +22,9 @@ This directory is a standalone Next.js application for the authenticated Strateg
 - Private document requests, uploads, deliverables, signed downloads, and revision metadata
 - Private Supabase Storage bucket with org-path upload policy and no public read policy
 - Clearly marked virus-scanning integration hook that is not yet a scanning control
+- Organization-scoped message threads with per-user read tracking and unread counts
+- Monthly close periods with client-visible status history and notes
+- Client dashboard summary for open requests, unread messages, latest proposal, and close status
 - No payment collection or public registration
 
 The database role `owner` is the admin-equivalent organization role. Application navigation may describe owner-level users as admins while retaining `owner|staff|client` in the database.
@@ -247,13 +250,54 @@ Staff deletion is a soft delete in Postgres followed by private-object cleanup. 
 
 **TODO: malware/virus scanning is not implemented yet.** `src/lib/security/virus-scan.ts` is an explicit provider-neutral hook for the production scanning integration. It currently emits a structured internal event stating `scanning_implemented: false`. MIME allowlisting, size limits, private storage, and blocked executable/script extensions are implemented, but none of those should be represented as malware scanning.
 
+## Messaging
+
+Phase 6 adds organization-scoped plain-text conversations.
+
+- Any active organization member can start a thread for that organization.
+- All active members of the organization at thread creation are added as thread participants.
+- Staff/owners with management access can view organization threads even if they were not an original participant.
+- Client access requires active organization membership and thread participation.
+- Messages are plain text in the MVP; attachment metadata remains optional and is not implemented.
+- Sending a message and creating a thread occur through security-definer functions with server-side input validation.
+- A user's own sent message is immediately marked read.
+- Opening a thread marks all messages from other senders in that thread read for the current user.
+- `get_portal_unread_message_count()` drives the unread badge in both client and staff navigation and the client dashboard.
+- `portal_thread_summaries()` provides the authorized thread list and per-thread unread count.
+
+The message tables remain deny-by-default for direct mutation. RLS reads use participant/org-manager authorization through `can_access_thread(thread_id)`.
+
+## Monthly close status
+
+Staff manages close periods inside each organization's admin page rather than through an additional admin route. Close periods represent full calendar months and use only the required workflow states:
+
+- `pending_records`
+- `in_progress`
+- `in_review`
+- `delivered`
+
+Clients view periods at `/app/close-status`. The page shows the current status, client-visible notes, and a timeline from `close_period_events`. UI copy intentionally does not promise fixed close dates.
+
+Creating a period writes `close.created`. Updating its status writes the required `close.status_changed` audit event; notes-only updates write `close.notes_updated`. Internal event hooks emit `close_period_created` and `close_status_changed` as supplemental telemetry.
+
+## Client dashboard
+
+`/app/dashboard` now shows the four Phase 6 summary items:
+
+- count of open document requests
+- unread message count
+- latest non-draft proposal and status
+- latest monthly close period and status
+
+Each summary links directly to the relevant client workflow.
+
 ## Deployment model
 
 Create a separate Vercel project from this same GitHub repository and set **Root Directory** to `portal`. This prevents the portal build from changing the existing static marketing-site deployment.
 
 A portal hostname can be attached later. Routes remain `/login`, `/accept-invite`, `/app/*`, and `/admin/*` relative to that portal host.
 
-## Implemented through Phase 5
+## Implemented through Phase 6
 
 - Project structure and dependency scaffolding
 - Environment validation and configuration
@@ -308,13 +352,21 @@ A portal hostname can be attached later. Routes remain `/login`, `/accept-invite
 - Upload/download/delete access logs and audit events
 - Staff soft-delete + storage cleanup
 - Explicit virus-scanning TODO hook
+- Typed message send/create/read contracts
+- Per-organization message threads and participants
+- Plain-text client/staff message composer
+- Per-user message read tracking and unread counts
+- Client and admin message routes
+- Typed close-period create/update contracts
+- Monthly close-period staff manager
+- Client-visible close-status history and notes
+- Required `close.status_changed` audit events
+- Client dashboard summary for open requests, unread messages, proposal status, and close status
 
 ## Pending
 
-Phase 6 and later still need:
+Phase 7 and later still need:
 
-- Messaging and read tracking
-- Close status UI/workflow
 - QBO billing-reference UI
 - Broader workflow audit events
 - Rate limiting and spam controls

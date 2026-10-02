@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireOrgManager } from "@/lib/auth/guards";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createInvite, resendInvite, revokeInvite, updateMembership } from "./actions";
+import { ClosePeriodManager } from "./close-period-manager";
 
 type OrganizationPageProps = {
   params: Promise<{ orgId: string }>;
@@ -17,6 +18,8 @@ const notices: Record<string, string> = {
   "membership-updated": "Membership updated.",
   "lead-converted": "Lead converted to this organization.",
   "lead-converted-invited": "Lead converted and the primary contact invitation was sent.",
+  "close-period-created": "Monthly close period created.",
+  "close-period-updated": "Monthly close status updated.",
 };
 
 const errors: Record<string, string> = {
@@ -33,6 +36,9 @@ const errors: Record<string, string> = {
   "membership-failed": "The membership could not be updated.",
   "lead-invite-failed": "The lead was converted, but the primary-contact invitation could not be created.",
   "lead-invite-delivery": "The lead was converted, but the primary-contact invitation email could not be delivered.",
+  "close-period-exists": "A close period already exists for that month.",
+  "close-period-create-failed": "The monthly close period could not be created.",
+  "close-period-update-failed": "The monthly close status could not be updated.",
 };
 
 function inviteStatus(invite: {
@@ -183,6 +189,8 @@ export default async function OrganizationPage({ params, searchParams }: Organiz
           <div className="empty-state"><strong>No memberships</strong></div>
         )}
       </section>
+
+      <ClosePeriodManager orgId={orgId} />
 
       <section className="admin-panel" aria-labelledby="invites-title">
         <div className="panel-heading">

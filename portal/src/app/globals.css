@@ -1322,3 +1322,351 @@ button:disabled {
     text-align: left;
   }
 }
+
+
+/* Phase 6: messaging and close status */
+.nav-badge {
+  display: inline-grid;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--navy);
+  color: white;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.new-thread-form,
+.close-create-form,
+.close-update-form {
+  display: grid;
+  gap: 16px;
+}
+
+.new-thread-form__body,
+.close-create-form__notes,
+.close-update-form__notes {
+  grid-column: 1 / -1;
+}
+
+.thread-list {
+  display: grid;
+  border-top: 1px solid var(--border);
+}
+
+.thread-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+}
+
+.thread-row:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.thread-row__main {
+  display: grid;
+  min-width: min(100%, 260px);
+  gap: 5px;
+}
+
+.thread-row__main p {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.thread-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.unread-badge {
+  display: inline-grid;
+  min-width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--amber);
+  color: var(--navy-deep);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.message-thread {
+  display: grid;
+  gap: 14px;
+  max-width: 860px;
+  margin-inline: auto;
+}
+
+.message-bubble {
+  justify-self: start;
+  width: min(82%, 680px);
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.message-bubble--own {
+  justify-self: end;
+  background: var(--navy);
+  color: white;
+}
+
+.message-bubble header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 10px;
+}
+
+.message-bubble header strong {
+  font-size: 13px;
+}
+
+.message-bubble header time {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.message-bubble--own header time {
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.message-bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.65;
+}
+
+.message-composer {
+  display: grid;
+  gap: 14px;
+}
+
+.message-composer .button {
+  width: fit-content;
+}
+
+.close-manager-list,
+.close-status-list {
+  display: grid;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.close-manager-row,
+.close-status-card {
+  padding: 20px;
+  border: 1px solid var(--border);
+  background: var(--paper);
+}
+
+.close-manager-row > header,
+.close-status-card > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.close-manager-row > header > div,
+.close-status-card > header > div {
+  display: grid;
+  gap: 4px;
+}
+
+.close-manager-row > header span:not(.status-chip),
+.close-status-card > header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.close-update-form {
+  margin-top: 16px;
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.close-status-card {
+  background: var(--surface);
+}
+
+.close-status-card h2 {
+  margin: 8px 0 3px;
+  font-size: 26px;
+}
+
+.close-status-card__notes {
+  margin: 18px 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.close-timeline {
+  display: grid;
+  gap: 0;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.close-timeline li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 12px;
+  padding-bottom: 18px;
+}
+
+.close-timeline li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  bottom: -2px;
+  left: 5px;
+  width: 1px;
+  background: var(--border);
+}
+
+.close-timeline__marker {
+  position: relative;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  margin-top: 4px;
+  border: 2px solid var(--navy);
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+.close-timeline li > div {
+  display: grid;
+  gap: 4px;
+}
+
+.close-timeline time {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.close-timeline p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.dashboard-card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 170px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  text-decoration: none;
+}
+
+.dashboard-card:hover {
+  border-color: var(--navy);
+  box-shadow: var(--shadow);
+}
+
+.dashboard-card__label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dashboard-card__metric {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 44px;
+  line-height: 1;
+}
+
+.dashboard-card > strong:not(.dashboard-card__metric) {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 22px;
+}
+
+.dashboard-card small {
+  color: var(--muted);
+}
+
+.dashboard-card__action {
+  margin-top: auto;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 760px) {
+  .new-thread-form {
+    grid-template-columns: minmax(180px, 0.6fr) minmax(240px, 1fr);
+  }
+
+  .close-create-form {
+    grid-template-columns: minmax(180px, 0.8fr) 190px;
+  }
+
+  .close-update-form {
+    grid-template-columns: 190px minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .close-update-form__notes {
+    grid-column: auto;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1080px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .thread-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .message-bubble {
+    width: 94%;
+  }
+}
