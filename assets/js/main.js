@@ -172,6 +172,48 @@ window.SBS_CONFIG = SBS_CONFIG;
     });
   }
 
+  function setupTierSelector() {
+    const group = doc.querySelector("[data-tier-tabs]");
+    if (!group) return;
+
+    const tabs = Array.from(group.querySelectorAll("[data-tier-tab]"));
+    const panels = Array.from(group.querySelectorAll("[data-tier-panel]"));
+    if (!tabs.length || !panels.length) return;
+
+    function activate(tab, moveFocus) {
+      const tier = tab.dataset.tierTab;
+
+      tabs.forEach((item) => {
+        const selected = item === tab;
+        item.setAttribute("aria-selected", String(selected));
+        item.tabIndex = selected ? 0 : -1;
+      });
+
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.tierPanel !== tier;
+      });
+
+      if (moveFocus) tab.focus();
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activate(tab, false));
+      tab.addEventListener("keydown", (event) => {
+        let nextIndex = null;
+
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+
+        if (nextIndex !== null) {
+          event.preventDefault();
+          activate(tabs[nextIndex], true);
+        }
+      });
+    });
+  }
+
   function loadAnalytics() {
     const measurementId = SBS_CONFIG.analytics.ga4MeasurementId;
     if (!measurementId) return;
@@ -269,6 +311,7 @@ window.SBS_CONFIG = SBS_CONFIG;
   applyConfig();
   setupMenu();
   setupTracking();
+  setupTierSelector();
   renderProofModules();
   loadAnalytics();
 
