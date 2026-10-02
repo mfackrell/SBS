@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { createInviteBrowserSupabaseClient } from "@/lib/supabase/invite-client";
 import { finalizeInvite } from "./actions";
 
 const formSchema = z
@@ -19,9 +18,13 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function AcceptInviteForm() {
-  const [sessionState, setSessionState] = useState<"checking" | "ready" | "missing">("checking");
-  const [accountEmail, setAccountEmail] = useState("");
+type AcceptInviteFormProps = {
+  inviteId: string;
+};
+
+export function AcceptInviteForm({ inviteId }: AcceptInviteFormProps) {
+  const [inviteToken, setInviteToken] = useState("");
+  const [linkState, setLinkState] = useState<"checking" | "ready" | "missing">("checking");
   const [serverError, setServerError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const {
@@ -38,30 +41,17 @@ export function AcceptInviteForm() {
   });
 
   useEffect(() => {
-    let active = true;
-    const supabase = createInviteBrowserSupabaseClient();
+    const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const token = fragment.get("token") ?? "";
 
-    async function loadInviteSession() {
-      await supabase.auth.getSession();
-      const { data, error } = await supabase.auth.getUser();
-
-      if (!active) return;
-
-      if (error || !data.user) {
-        setSessionState("missing");
-        return;
-      }
-
-      setAccountEmail(data.user.email ?? "");
-      setSessionState("ready");
+    if (!inviteId || !token) {
+      setLinkState("missing");
+      return;
     }
 
-    void loadInviteSession();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+    setInviteToken(token);
+    setLinkState("ready");
+  }, [inviteId]);
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError("");
@@ -77,23 +67,19 @@ export function AcceptInviteForm() {
       return;
     }
 
-    setSubmitting(true);
-
-    const supabase = createInviteBrowserSupabaseClient();
-    const { error: passwordError } = await supabase.auth.updateUser({
-      password: parsed.data.password,
-      data: {
-        full_name: parsed.data.fullName,
-      },
-    });
-
-    if (passwordError) {
-      setServerError("We could not set your password. The invitation may have expired.");
-      setSubmitting(false);
+    if (!inviteId || !inviteToken) {
+      setServerError("This invitation link is incomplete. Use the newest invitation link.");
       return;
     }
 
-    const result = await finalizeInvite({ fullName: parsed.data.fullName });
+    setSubmitting(true);
+
+    const result = await finalizeInvite({
+      inviteId,
+      inviteToken,
+      fullName: parsed.data.fullName,
+      password: parsed.data.password,
+    });
 
     if (result?.error) {
       setServerError(result.error);
@@ -101,23 +87,21 @@ export function AcceptInviteForm() {
     }
   });
 
-  if (sessionState === "checking") {
+  if (linkState === "checking") {
     return <p className="auth-note" role="status">Checking your invitation.</p>;
   }
 
-  if (sessionState === "missing") {
+  if (linkState === "missing") {
     return (
       <div className="auth-state" role="alert">
-        <strong>Invitation session not found</strong>
-        <p>Open the newest invitation email from Strategic Business Services. If the link has expired, ask for a new invitation.</p>
+        <strong>Invitation link is incomplete</strong>
+        <p>Use the newest invitation link from Strategic Business Services. If you need another link, ask SBS to resend the invitation.</p>
       </div>
     );
   }
 
   return (
     <form className="login-form" onSubmit={onSubmit} noValidate>
-      {accountEmail ? <p className="invite-email">Invited account: <strong>{accountEmail}</strong></p> : null}
-
       <div className="field">
         <label htmlFor="fullName">Full name</label>
         <input id="fullName" autoComplete="name" {...register("fullName")} aria-invalid={Boolean(errors.fullName)} />

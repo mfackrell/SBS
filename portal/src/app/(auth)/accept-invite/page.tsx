@@ -3,7 +3,14 @@ import { AcceptInviteForm } from "./accept-invite-form";
 
 export const dynamic = "force-dynamic";
 
-export default function AcceptInvitePage() {
+type AcceptInvitePageProps = {
+  searchParams: Promise<{ invite_id?: string }>;
+};
+
+export default async function AcceptInvitePage({ searchParams }: AcceptInvitePageProps) {
+  const params = await searchParams;
+  const inviteId = typeof params.invite_id === "string" ? params.invite_id : "";
+
   return (
     <main className="auth-shell">
       <section className="auth-panel" aria-labelledby="accept-title">
@@ -18,7 +25,7 @@ export default function AcceptInvitePage() {
             Confirm your name and create a password to finish accepting your invitation.
           </p>
 
-          <AcceptInviteForm />
+          <AcceptInviteForm inviteId={inviteId} />
 
           <p className="auth-note">
             Access is tied to the email address that received the invitation. Invitations can be revoked by Strategic Business Services before acceptance.

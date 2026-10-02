@@ -89,7 +89,7 @@ export async function createInvite(formData: FormData) {
 
   const env = getServerEnv();
   const admin = createAdminSupabaseClient();
-  const { error: deliveryError } = await admin.auth.admin.inviteUserByEmail(parsed.data.email, {
+  const { data: delivered, error: deliveryError } = await admin.auth.admin.inviteUserByEmail(parsed.data.email, {
     data: {
       portal_invite_id: inviteId,
       portal_invite_token: token,
@@ -110,6 +110,13 @@ export async function createInvite(formData: FormData) {
       metadata: { email: parsed.data.email, reason: deliveryError.message },
     });
     redirect(`/admin/organizations/${parsed.data.orgId}?error=invite-delivery`);
+  }
+
+  if (delivered.user?.id) {
+    await admin
+      .from("invites")
+      .update({ auth_user_id: delivered.user.id })
+      .eq("id", inviteId);
   }
 
   revalidatePath(`/admin/organizations/${parsed.data.orgId}`);
@@ -186,6 +193,11 @@ export async function resendInvite(formData: FormData) {
         portal_role: invite.role,
       },
     });
+
+    await admin
+      .from("invites")
+      .update({ auth_user_id: delivered.user.id })
+      .eq("id", inviteId.data);
   }
 
   await writeAuditLog({
