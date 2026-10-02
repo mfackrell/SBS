@@ -1,0 +1,31 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/bookkeeping",
+      "destination": "/month-end-close/",
+      "permanent": true
+    },
+    {
+      "source": "/e-commerce",
+      "destination": "/ecommerce-accounting/",
+      "permanent": true
+    },
+    {
+      "source": "/ecommerce",
+      "destination": "/ecommerce-accounting/",
+      "permanent": true
+    },
+    {
+      "source": "/fractional-cfo",
+      "destination": "/consulting/",
+      "permanent": true
+    },
+    {
+      "source": "/international",
+      "destination": "/consulting/",
+      "permanent": true
+    }
+  ]
+}
