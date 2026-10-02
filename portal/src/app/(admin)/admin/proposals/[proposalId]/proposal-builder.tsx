@@ -95,8 +95,8 @@ export function ProposalBuilder({ proposal, lineItems }: ProposalBuilderProps) {
         const [first, second, third] = issue.path;
         if (first === "title" || first === "currency" || first === "expiresOn" || first === "termsText") {
           setError(first, { message: issue.message });
-        } else if (first === "lineItems" && typeof second === "number" && typeof third === "string") {
-          setError(`lineItems.${second}.${third as "label" | "description" | "quantity" | "unitPrice"}`, { message: issue.message });
+        } else if (first === "lineItems") {
+          setMessage("Check each line item for a service name, positive quantity, and nonnegative unit price.");
         }
       });
       return;
