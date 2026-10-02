@@ -112,7 +112,10 @@ export async function finalizeInvite(input: {
       .eq("id", invite.id);
   }
 
-  const cleanMetadata = { ...existingMetadata, full_name: parsed.data.fullName };
+  const cleanMetadata: Record<string, unknown> = {
+    ...existingMetadata,
+    full_name: parsed.data.fullName,
+  };
   delete cleanMetadata.portal_invite_id;
   delete cleanMetadata.portal_invite_token;
   delete cleanMetadata.portal_org_id;
