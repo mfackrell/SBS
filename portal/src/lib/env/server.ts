@@ -1,10 +1,12 @@
 import "server-only";
+
 import { z } from "zod";
 import { getPublicEnv } from "./public";
 
 const serverEnvSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   SUPABASE_JWT_SECRET: z.string().min(1).optional(),
+  INVITE_EXPIRES_MINUTES: z.coerce.number().int().positive().max(10080).default(60),
   RATE_LIMIT_WINDOW_SECONDS: z.coerce.number().int().positive().default(60),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(20),
   FILE_UPLOAD_MAX_MB: z.coerce.number().positive().default(25),
@@ -19,6 +21,7 @@ export function getServerEnv() {
   const server = serverEnvSchema.parse({
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET || undefined,
+    INVITE_EXPIRES_MINUTES: process.env.INVITE_EXPIRES_MINUTES,
     RATE_LIMIT_WINDOW_SECONDS: process.env.RATE_LIMIT_WINDOW_SECONDS,
     RATE_LIMIT_MAX_REQUESTS: process.env.RATE_LIMIT_MAX_REQUESTS,
     FILE_UPLOAD_MAX_MB: process.env.FILE_UPLOAD_MAX_MB,

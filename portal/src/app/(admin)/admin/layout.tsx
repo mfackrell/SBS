@@ -20,7 +20,8 @@ export default async function AdminAppLayout({
 
       <div className="portal-body">
         <nav className="portal-nav" aria-label="Staff portal">
-          <Link href="/admin/dashboard" aria-current="page">Dashboard</Link>
+          <Link href="/admin/dashboard">Dashboard</Link>
+          <Link href="/admin/organizations">Organizations</Link>
         </nav>
         <main className="portal-main">{children}</main>
       </div>

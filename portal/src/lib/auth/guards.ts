@@ -1,4 +1,5 @@
 import "server-only";
+
 import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -74,6 +75,40 @@ export async function requireClientUser() {
   const context = await requireAuthenticatedUser();
 
   if (!context.memberships.some((membership) => membership.role === "client")) {
+    redirect("/admin/dashboard");
+  }
+
+  return context;
+}
+
+export async function requireOrgMember(orgId: string) {
+  const context = await requireAuthenticatedUser();
+  const membership = context.memberships.find((item) => item.org_id === orgId);
+
+  if (!membership) {
+    redirect("/login?error=not-authorized");
+  }
+
+  return {
+    ...context,
+    orgRole: membership.role,
+  };
+}
+
+export async function requireOrgManager(orgId: string) {
+  const context = await requireOrgMember(orgId);
+
+  if (!isStaffRole(context.orgRole)) {
+    redirect("/app/dashboard");
+  }
+
+  return context;
+}
+
+export async function requireOrgOwner(orgId: string) {
+  const context = await requireOrgMember(orgId);
+
+  if (context.orgRole !== "owner") {
     redirect("/admin/dashboard");
   }
 
