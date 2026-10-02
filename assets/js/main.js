@@ -177,6 +177,26 @@ window.SBS_CONFIG = SBS_CONFIG;
     });
   }
 
+  function setupNavDropdowns() {
+    const dropdowns = Array.from(doc.querySelectorAll(".nav-dropdown"));
+    if (!dropdowns.length) return;
+
+    dropdowns.forEach((dropdown) => {
+      dropdown.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          dropdown.removeAttribute("open");
+          dropdown.querySelector("summary")?.focus();
+        }
+      });
+    });
+
+    doc.addEventListener("click", (event) => {
+      dropdowns.forEach((dropdown) => {
+        if (!dropdown.contains(event.target)) dropdown.removeAttribute("open");
+      });
+    });
+  }
+
   function setupTierSelector() {
     const group = doc.querySelector("[data-tier-tabs]");
     if (!group) return;
@@ -726,6 +746,7 @@ window.SBS_CONFIG = SBS_CONFIG;
   applyConfig();
   setupMenu();
   setupTracking();
+  setupNavDropdowns();
   setupTierSelector();
   setupConditionalFields();
   setupLeadForm();
