@@ -258,6 +258,14 @@ p {
   font-size: 0.82rem;
 }
 
+.header-cta__full {
+  display: none;
+}
+
+.header-cta__compact {
+  display: inline;
+}
+
 .menu-toggle {
   display: inline-grid;
   width: 2.75rem;
@@ -300,8 +308,7 @@ p {
 }
 
 .hero-grid {
-  display: grid;
-  gap: var(--space-8);
+  display: block;
 }
 
 .hero-copy {
@@ -320,6 +327,16 @@ p {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
+}
+
+.button-row--spaced {
+  margin-top: var(--space-8);
+}
+
+.hero-offer {
+  color: var(--color-muted);
+  font-size: var(--step--1);
+  font-weight: 700;
 }
 
 .hero-aside {
@@ -711,13 +728,16 @@ p {
     font-size: 0.84rem;
   }
 
-  .hero {
-    padding-block: var(--space-24);
+  .header-cta__compact {
+    display: none;
   }
 
-  .hero-grid {
-    grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 0.7fr);
-    align-items: end;
+  .header-cta__full {
+    display: inline;
+  }
+
+  .hero {
+    padding-block: var(--space-24);
   }
 
   .trust-list {
