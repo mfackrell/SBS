@@ -5,7 +5,7 @@ import { getServerEnv } from "@/lib/env/server";
 
 export function verifyLeadIngestSecret(candidate: string | null) {
   const env = getServerEnv();
-  if (!candidate) return false;
+  if (!candidate || !env.LEAD_INGEST_SHARED_SECRET) return false;
 
   const expected = Buffer.from(env.LEAD_INGEST_SHARED_SECRET);
   const received = Buffer.from(candidate);
@@ -16,7 +16,10 @@ export function verifyLeadIngestSecret(candidate: string | null) {
 export function leadFingerprint(clientIp: string, userAgent: string) {
   const env = getServerEnv();
 
-  return createHmac("sha256", env.LEAD_RATE_LIMIT_SALT)
+  return createHmac(
+    "sha256",
+    env.LEAD_RATE_LIMIT_SALT ?? env.SUPABASE_SERVICE_ROLE_KEY,
+  )
     .update(`${clientIp.trim()}|${userAgent.slice(0, 300)}`)
     .digest("hex");
 }
