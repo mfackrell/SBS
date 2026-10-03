@@ -57,6 +57,12 @@ Set:
 
 Do not reuse the marketing project whose root is the repository root.
 
+Production custom domain:
+
+- `portal.contract-cfo.com`
+- The project-level Vercel alias is declared in `portal/vercel.json`.
+- External DNS must provide the `portal` CNAME requested by Vercel.
+
 ## 5. Portal environment variables
 
 Set these in Vercel Production and the environments where the portal is tested:
