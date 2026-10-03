@@ -13,8 +13,8 @@ const securityHeaders = [
 
 const inferredAppUrl =
   process.env.NEXT_PUBLIC_APP_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  (process.env.VERCEL_ENV === "production"
+    ? "https://portal.contract-cfo.com"
     : process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
