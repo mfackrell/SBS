@@ -26,6 +26,7 @@ export default async function AdminAppLayout({
           <Link href="/admin/dashboard">Dashboard</Link>
           <Link href="/admin/leads">Leads</Link>
           <Link href="/admin/organizations">Organizations</Link>
+          <Link href="/admin/quickbooks">QuickBooks</Link>
           <Link href="/admin/proposals">Proposals</Link>
           <Link href="/admin/requests">Requests</Link>
           <Link href="/admin/messages">Messages{unreadMessages > 0 ? <span className="nav-badge">{unreadMessages}</span> : null}</Link>

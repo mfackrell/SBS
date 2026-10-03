@@ -1,4 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "alias": ["portal.contract-cfo.com"]
+  "alias": ["portal.contract-cfo.com"],
+  "crons": [
+    {
+      "path": "/api/cron/quickbooks-sync",
+      "schedule": "0 11 * * *"
+    }
+  ]
 }

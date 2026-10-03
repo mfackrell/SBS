@@ -20,6 +20,13 @@ const serverEnvSchema = z.object({
   RESEND_API_KEY: z.string().min(1).optional(),
   PORTAL_EMAIL_FROM: z.string().min(1).default("Strategic Business Services <portal@contract-cfo.com>"),
   PORTAL_EMAIL_REPLY_TO: z.string().email().default("mfackrell@contract-cfo.com"),
+  INTUIT_CLIENT_ID: z.string().min(1).optional(),
+  INTUIT_CLIENT_SECRET: z.string().min(1).optional(),
+  QUICKBOOKS_ENVIRONMENT: z.enum(["sandbox", "production"]).default("sandbox"),
+  QUICKBOOKS_TOKEN_ENCRYPTION_KEY: z.string().min(32).optional(),
+  QUICKBOOKS_STATE_SECRET: z.string().min(32).optional(),
+  QUICKBOOKS_WEBHOOK_VERIFIER_TOKEN: z.string().min(1).optional(),
+  CRON_SECRET: z.string().min(16).optional(),
   FEATURE_FLAGS: z.string().optional(),
 });
 
@@ -41,6 +48,13 @@ export function getServerEnv() {
     RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
     PORTAL_EMAIL_FROM: process.env.PORTAL_EMAIL_FROM,
     PORTAL_EMAIL_REPLY_TO: process.env.PORTAL_EMAIL_REPLY_TO,
+    INTUIT_CLIENT_ID: process.env.INTUIT_CLIENT_ID || undefined,
+    INTUIT_CLIENT_SECRET: process.env.INTUIT_CLIENT_SECRET || undefined,
+    QUICKBOOKS_ENVIRONMENT: process.env.QUICKBOOKS_ENVIRONMENT,
+    QUICKBOOKS_TOKEN_ENCRYPTION_KEY: process.env.QUICKBOOKS_TOKEN_ENCRYPTION_KEY || undefined,
+    QUICKBOOKS_STATE_SECRET: process.env.QUICKBOOKS_STATE_SECRET || undefined,
+    QUICKBOOKS_WEBHOOK_VERIFIER_TOKEN: process.env.QUICKBOOKS_WEBHOOK_VERIFIER_TOKEN || undefined,
+    CRON_SECRET: process.env.CRON_SECRET || undefined,
     FEATURE_FLAGS: process.env.FEATURE_FLAGS,
   });
 
