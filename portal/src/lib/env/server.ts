@@ -17,6 +17,9 @@ const serverEnvSchema = z.object({
     "application/pdf,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg",
   ),
   QBO_BILLING_BASE_URL: z.string().url().optional().or(z.literal("")),
+  RESEND_API_KEY: z.string().min(1).optional(),
+  PORTAL_EMAIL_FROM: z.string().min(1).default("Strategic Business Services <portal@contract-cfo.com>"),
+  PORTAL_EMAIL_REPLY_TO: z.string().email().default("mfackrell@contract-cfo.com"),
   FEATURE_FLAGS: z.string().optional(),
 });
 
@@ -35,6 +38,9 @@ export function getServerEnv() {
     FILE_UPLOAD_MAX_MB: process.env.FILE_UPLOAD_MAX_MB,
     ALLOWED_MIME_TYPES: process.env.ALLOWED_MIME_TYPES,
     QBO_BILLING_BASE_URL: process.env.QBO_BILLING_BASE_URL,
+    RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
+    PORTAL_EMAIL_FROM: process.env.PORTAL_EMAIL_FROM,
+    PORTAL_EMAIL_REPLY_TO: process.env.PORTAL_EMAIL_REPLY_TO,
     FEATURE_FLAGS: process.env.FEATURE_FLAGS,
   });
 

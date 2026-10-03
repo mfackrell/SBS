@@ -6,6 +6,8 @@ import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
 import { requireStaffUser } from "@/lib/auth/guards";
 import { getServerEnv } from "@/lib/env/server";
+import { sendPortalInviteEmail } from "@/lib/email/invite-email";
+import { ensureInviteAuthUser } from "@/lib/invites/auth-user";
 import { createInviteToken } from "@/lib/invites/token";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -115,39 +117,51 @@ export async function convertLead(formData: FormData) {
     redirect(`/admin/organizations/${orgId}?error=lead-invite-failed`);
   }
 
-  const { data: invited, error: deliveryError } = await admin.auth.admin.inviteUserByEmail(lead.email, {
-    data: {
-      full_name: lead.name,
-      portal_invite_id: inviteId,
-      portal_invite_token: token,
-      portal_org_id: orgId,
-      portal_role: "client",
-    },
-    redirectTo: `${env.NEXT_PUBLIC_APP_URL}/accept-invite`,
-  });
+  let invitedUserId: string;
 
-  if (deliveryError || !invited.user) {
+  try {
+    const invitedUser = await ensureInviteAuthUser({
+      email: lead.email,
+      fullName: lead.name,
+    });
+    invitedUserId = invitedUser.id;
+
+    await admin
+      .from("invites")
+      .update({ auth_user_id: invitedUser.id })
+      .eq("id", inviteId);
+
+    await sendPortalInviteEmail({
+      to: lead.email,
+      organizationName: parsed.data.organizationName,
+      inviteId,
+      token,
+      role: "client",
+      expiresAt,
+    });
+  } catch (error) {
     await supabase.rpc("revoke_portal_invite", { target_invite_id: inviteId });
+    const reason = error instanceof Error ? error.message : "email_delivery_failed";
     await writeAuditLog({
       orgId,
       actorUserId: context.user.id,
       eventType: "lead.primary_contact_invite_failed",
       entityType: "lead",
       entityId: parsed.data.leadId,
-      metadata: { email: lead.email, reason: deliveryError?.message ?? "missing_invited_user" },
+      metadata: { email: lead.email, reason: reason.slice(0, 200) },
     });
     redirect(`/admin/organizations/${orgId}?error=lead-invite-delivery`);
   }
 
   await admin.from("profiles").upsert({
-    user_id: invited.user.id,
+    user_id: invitedUserId,
     full_name: lead.name,
     phone: lead.phone,
   });
 
   const { error: primaryContactError } = await admin
     .from("organizations")
-    .update({ primary_contact_id: invited.user.id })
+    .update({ primary_contact_id: invitedUserId })
     .eq("id", orgId);
 
   if (primaryContactError) {
@@ -166,7 +180,7 @@ export async function convertLead(formData: FormData) {
       eventType: "organization.primary_contact_set",
       entityType: "organization",
       entityId: orgId,
-      metadata: { lead_id: parsed.data.leadId, user_id: invited.user.id },
+      metadata: { lead_id: parsed.data.leadId, user_id: invitedUserId },
     });
   }
 

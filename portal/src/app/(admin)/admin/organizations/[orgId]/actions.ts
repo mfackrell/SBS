@@ -7,6 +7,8 @@ import { requireOrgManager } from "@/lib/auth/guards";
 import { isOrgRole } from "@/lib/auth/roles";
 import { writeAuditLog } from "@/lib/audit";
 import { getServerEnv } from "@/lib/env/server";
+import { sendPortalInviteEmail } from "@/lib/email/invite-email";
+import { ensureInviteAuthUser } from "@/lib/invites/auth-user";
 import { createInviteToken } from "@/lib/invites/token";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -87,36 +89,61 @@ export async function createInvite(formData: FormData) {
     redirect(`/admin/organizations/${parsed.data.orgId}?error=${code}`);
   }
 
-  const env = getServerEnv();
-  const admin = createAdminSupabaseClient();
-  const { data: delivered, error: deliveryError } = await admin.auth.admin.inviteUserByEmail(parsed.data.email, {
-    data: {
-      portal_invite_id: inviteId,
-      portal_invite_token: token,
-      portal_org_id: parsed.data.orgId,
-      portal_role: parsed.data.role,
-    },
-    redirectTo: `${env.NEXT_PUBLIC_APP_URL}/accept-invite`,
-  });
+  const { data: organization, error: organizationError } = await supabase
+    .from("organizations")
+    .select("name")
+    .eq("id", parsed.data.orgId)
+    .maybeSingle();
 
-  if (deliveryError) {
+  if (organizationError || !organization) {
     await supabase.rpc("revoke_portal_invite", { target_invite_id: inviteId });
+    redirect(`/admin/organizations/${parsed.data.orgId}?error=invite-delivery`);
+  }
+
+  try {
+    const invitedUser = await ensureInviteAuthUser({
+      email: parsed.data.email,
+    });
+    const admin = createAdminSupabaseClient();
+
+    await admin
+      .from("invites")
+      .update({ auth_user_id: invitedUser.id })
+      .eq("id", inviteId);
+
+    const delivery = await sendPortalInviteEmail({
+      to: parsed.data.email,
+      organizationName: organization.name,
+      inviteId,
+      token,
+      role: parsed.data.role,
+      expiresAt,
+    });
+
+    await writeAuditLog({
+      orgId: parsed.data.orgId,
+      actorUserId: context.user.id,
+      eventType: "invite.delivery_succeeded",
+      entityType: "invite",
+      entityId: inviteId,
+      metadata: {
+        email: parsed.data.email,
+        provider: delivery.provider,
+        provider_message_id: delivery.messageId,
+      },
+    });
+  } catch (error) {
+    await supabase.rpc("revoke_portal_invite", { target_invite_id: inviteId });
+    const reason = error instanceof Error ? error.message : "email_delivery_failed";
     await writeAuditLog({
       orgId: parsed.data.orgId,
       actorUserId: context.user.id,
       eventType: "invite.delivery_failed",
       entityType: "invite",
       entityId: inviteId,
-      metadata: { email: parsed.data.email, reason: deliveryError.message },
+      metadata: { email: parsed.data.email, reason: reason.slice(0, 200) },
     });
     redirect(`/admin/organizations/${parsed.data.orgId}?error=invite-delivery`);
-  }
-
-  if (delivered.user?.id) {
-    await admin
-      .from("invites")
-      .update({ auth_user_id: delivered.user.id })
-      .eq("id", inviteId);
   }
 
   revalidatePath(`/admin/organizations/${parsed.data.orgId}`);
@@ -159,45 +186,60 @@ export async function resendInvite(formData: FormData) {
     redirect(`/admin/organizations/${orgId.data}?error=resend-failed`);
   }
 
-  const env = getServerEnv();
-  const admin = createAdminSupabaseClient();
-  const { data: delivered, error: deliveryError } = await admin.auth.admin.inviteUserByEmail(invite.email, {
-    data: {
-      portal_invite_id: invite.id ?? inviteId.data,
-      portal_invite_token: token,
-      portal_org_id: orgId.data,
-      portal_role: invite.role,
-    },
-    redirectTo: `${env.NEXT_PUBLIC_APP_URL}/accept-invite`,
-  });
+  const { data: organization, error: organizationError } = await supabase
+    .from("organizations")
+    .select("name")
+    .eq("id", orgId.data)
+    .maybeSingle();
 
-  if (deliveryError) {
+  if (organizationError || !organization) {
+    redirect(`/admin/organizations/${orgId.data}?error=resend-delivery`);
+  }
+
+  try {
+    const invitedUser = await ensureInviteAuthUser({
+      email: invite.email,
+    });
+    const admin = createAdminSupabaseClient();
+
+    await admin
+      .from("invites")
+      .update({ auth_user_id: invitedUser.id })
+      .eq("id", inviteId.data);
+
+    const delivery = await sendPortalInviteEmail({
+      to: invite.email,
+      organizationName: organization.name,
+      inviteId: invite.id ?? inviteId.data,
+      token,
+      role: invite.role,
+      expiresAt,
+    });
+
+    await writeAuditLog({
+      orgId: orgId.data,
+      actorUserId: context.user.id,
+      eventType: "invite.delivery_succeeded",
+      entityType: "invite",
+      entityId: inviteId.data,
+      metadata: {
+        email: invite.email,
+        action: "resend",
+        provider: delivery.provider,
+        provider_message_id: delivery.messageId,
+      },
+    });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "email_delivery_failed";
     await writeAuditLog({
       orgId: orgId.data,
       actorUserId: context.user.id,
       eventType: "invite.delivery_failed",
       entityType: "invite",
       entityId: inviteId.data,
-      metadata: { email: invite.email, reason: deliveryError.message, action: "resend" },
+      metadata: { email: invite.email, reason: reason.slice(0, 200), action: "resend" },
     });
     redirect(`/admin/organizations/${orgId.data}?error=resend-delivery`);
-  }
-
-  if (delivered.user?.id) {
-    await admin.auth.admin.updateUserById(delivered.user.id, {
-      user_metadata: {
-        ...delivered.user.user_metadata,
-        portal_invite_id: inviteId.data,
-        portal_invite_token: token,
-        portal_org_id: orgId.data,
-        portal_role: invite.role,
-      },
-    });
-
-    await admin
-      .from("invites")
-      .update({ auth_user_id: delivered.user.id })
-      .eq("id", inviteId.data);
   }
 
   await writeAuditLog({
